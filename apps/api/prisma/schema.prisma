@@ -1,0 +1,310 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  owner
+  admin
+  manager
+  employee
+  accountant
+}
+
+enum LeadStatus {
+  new
+  contacted
+  site_visit
+  quoted
+  won
+  lost
+}
+
+enum LeadSource {
+  walk_in
+  referral
+  website
+  phone
+  social
+  other
+}
+
+enum QuotationStatus {
+  draft
+  sent
+  accepted
+  rejected
+  expired
+}
+
+enum ProjectStatus {
+  planning
+  in_progress
+  on_hold
+  completed
+  cancelled
+}
+
+enum MilestoneStatus {
+  pending
+  in_progress
+  completed
+}
+
+// ── Phase 5 ──────────────────────────────────────────────────────────────────
+
+enum EmploymentStatus {
+  active
+  inactive
+  terminated
+}
+
+// ── Phase 6 ──────────────────────────────────────────────────────────────────
+
+enum ExpenseCategory {
+  materials
+  labor
+  transport
+  equipment
+  overhead
+  other
+}
+
+enum ExpenseStatus {
+  pending
+  approved
+  rejected
+}
+
+// ── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id                  String              @id @default(uuid())
+  email               String              @unique
+  passwordHash        String              @map("password_hash")
+  name                String
+  role                UserRole
+  isActive            Boolean             @default(true) @map("is_active")
+  emailVerified       Boolean             @default(false) @map("email_verified")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  refreshTokenVersion Int                 @default(0) @map("refresh_token_version")
+  invitationsSent     UserInvitation[]    @relation("InvitedByUser")
+  passwordResetTokens PasswordResetToken[]
+  assignedLeads       Lead[]              @relation("LeadAssignee")
+  activityLogs        ActivityLog[]
+  quotationsCreated   Quotation[]         @relation("QuotationCreator")
+  projectAssignments  ProjectAssignment[]
+  employeeProfile     Employee?
+  expensesSubmitted   Expense[]           @relation("ExpenseSubmitter")
+  expensesApproved    Expense[]           @relation("ExpenseApprover")
+
+  @@map("users")
+}
+
+model UserInvitation {
+  id         String   @id @default(uuid())
+  email      String
+  name       String
+  role       UserRole
+  tokenHash  String   @unique @map("token_hash")
+  invitedBy  String   @map("invited_by")
+  acceptedAt DateTime? @map("accepted_at")
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  inviter    User     @relation("InvitedByUser", fields: [invitedBy], references: [id])
+
+  @@index([email])
+  @@map("user_invitations")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  usedAt    DateTime? @map("used_at")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model Lead {
+  id             String        @id @default(uuid())
+  clientName     String        @map("client_name")
+  contactPhone   String        @map("contact_phone")
+  contactEmail   String?       @map("contact_email")
+  source         LeadSource
+  status         LeadStatus    @default(new)
+  estimatedValue Decimal       @default(0) @map("estimated_value") @db.Decimal(12, 2)
+  assignedTo     String?       @map("assigned_to")
+  notes          String?
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  assignee       User?         @relation("LeadAssignee", fields: [assignedTo], references: [id])
+  quotations     Quotation[]
+  projects       Project[]
+
+  @@index([status])
+  @@index([source])
+  @@index([assignedTo])
+  @@map("leads")
+}
+
+model Quotation {
+  id              String          @id @default(uuid())
+  leadId          String          @map("lead_id")
+  quotationNumber String          @unique @map("quotation_number")
+  status          QuotationStatus @default(draft)
+  subtotal        Decimal         @default(0) @db.Decimal(12, 2)
+  tax             Decimal         @default(0) @db.Decimal(12, 2)
+  total           Decimal         @default(0) @db.Decimal(12, 2)
+  validUntil      DateTime?       @map("valid_until")
+  createdBy       String?         @map("created_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  lead            Lead            @relation(fields: [leadId], references: [id])
+  creator         User?           @relation("QuotationCreator", fields: [createdBy], references: [id])
+  items           QuotationItem[]
+  project         Project?
+
+  @@index([leadId])
+  @@index([status])
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id          String    @id @default(uuid())
+  quotationId String    @map("quotation_id")
+  description String
+  unit        String
+  quantity    Decimal   @db.Decimal(12, 2)
+  unitPrice   Decimal   @map("unit_price") @db.Decimal(12, 2)
+  total       Decimal   @db.Decimal(12, 2)
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@index([quotationId])
+  @@map("quotation_items")
+}
+
+model ActivityLog {
+  id           String   @id @default(uuid())
+  userId       String?  @map("user_id")
+  action       String
+  entityType   String   @map("entity_type")
+  entityId     String   @map("entity_id")
+  metadataJson Json     @default("{}") @map("metadata_json")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@map("activity_logs")
+}
+
+model Project {
+  id          String              @id @default(uuid())
+  leadId      String?             @map("lead_id")
+  quotationId String?             @unique @map("quotation_id")
+  name        String
+  clientName  String              @map("client_name")
+  status      ProjectStatus       @default(planning)
+  startDate   DateTime?           @map("start_date")
+  endDate     DateTime?           @map("end_date")
+  budget      Decimal             @default(0) @db.Decimal(12, 2)
+  address     String?
+  progress    Int                 @default(0)
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+  lead        Lead?               @relation(fields: [leadId], references: [id])
+  quotation   Quotation?          @relation(fields: [quotationId], references: [id])
+  milestones  ProjectMilestone[]
+  assignments ProjectAssignment[]
+  expenses    Expense[]
+
+  @@index([leadId])
+  @@index([status])
+  @@map("projects")
+}
+
+model ProjectMilestone {
+  id          String          @id @default(uuid())
+  projectId   String          @map("project_id")
+  title       String
+  dueDate     DateTime?       @map("due_date")
+  status      MilestoneStatus @default(pending)
+  completedAt DateTime?       @map("completed_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_milestones")
+}
+
+model ProjectAssignment {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  userId        String   @map("user_id")
+  roleOnProject String   @map("role_on_project")
+  createdAt     DateTime @default(now()) @map("created_at")
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("project_assignments")
+}
+
+model Employee {
+  id            String           @id @default(uuid())
+  userId        String?          @unique @map("user_id")
+  name          String
+  cnic          String?          @unique
+  phone         String?
+  email         String?
+  jobTitle      String           @map("job_title")
+  dailyWage     Decimal?         @map("daily_wage") @db.Decimal(10, 2)
+  monthlySalary Decimal?         @map("monthly_salary") @db.Decimal(10, 2)
+  status        EmploymentStatus @default(active)
+  hireDate      DateTime?        @map("hire_date")
+  notes         String?
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  user          User?            @relation(fields: [userId], references: [id])
+  expenses      Expense[]
+
+  @@index([status])
+  @@map("employees")
+}
+
+model Expense {
+  id            String          @id @default(uuid())
+  projectId     String?         @map("project_id")
+  employeeId    String?         @map("employee_id")
+  submittedBy   String?         @map("submitted_by")
+  approvedBy    String?         @map("approved_by")
+  category      ExpenseCategory
+  description   String
+  amount        Decimal         @db.Decimal(12, 2)
+  expenseDate   DateTime        @map("expense_date")
+  status        ExpenseStatus   @default(pending)
+  receiptNote   String?         @map("receipt_note")
+  rejectionNote String?         @map("rejection_note")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  project       Project?        @relation(fields: [projectId], references: [id])
+  employee      Employee?       @relation(fields: [employeeId], references: [id])
+  submitter     User?           @relation("ExpenseSubmitter", fields: [submittedBy], references: [id])
+  approver      User?           @relation("ExpenseApprover", fields: [approvedBy], references: [id])
+
+  @@index([projectId])
+  @@index([status])
+  @@index([submittedBy])
+  @@map("expenses")
+}

@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+coverage
+*.tsbuildinfo
+apps/web/dist
+apps/api/prisma/dev.db
+.env.example
+.pnpm-store

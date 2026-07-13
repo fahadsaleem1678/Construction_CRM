@@ -1,0 +1,93 @@
+/* ─── Google Fonts: DM Sans + JetBrains Mono ─────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+html {
+  background: #0f0f0f;
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #0f0f0f;
+  color: #e5e7eb;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+/* Remove browser input autofill yellow */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e5e7eb;
+  -webkit-box-shadow: 0 0 0 100px #1e1e1e inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ─── Ticker Marquee ──────────────────────────────────────────────────────── */
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker 32s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #161616;
+}
+::-webkit-scrollbar-thumb {
+  background: #3d3d3d;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
+/* ─── Focus ───────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #d97706;
+  outline-offset: 2px;
+}
+
+/* ─── Selection ───────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(217, 119, 6, 0.25);
+  color: #f9fafb;
+}
+
+/* ─── Status badge helpers ────────────────────────────────────────────────── */
+.badge-amber   { background: rgba(120,53,15,0.55);  color: #fbbf24; border: 1px solid rgba(217,119,6,0.3); }
+.badge-green   { background: rgba(20,83,45,0.55);   color: #4ade80; border: 1px solid rgba(22,163,74,0.3); }
+.badge-red     { background: rgba(127,29,29,0.55);  color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
+.badge-blue    { background: rgba(30,58,138,0.55);  color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); }
+.badge-yellow  { background: rgba(113,63,18,0.55);  color: #fcd34d; border: 1px solid rgba(202,138,4,0.3); }
+.badge-default { background: rgba(46,46,46,0.8);    color: #9ca3af; border: 1px solid #3d3d3d; }
+
+/* ─── Table row hover ─────────────────────────────────────────────────────── */
+.sc-table-row:hover {
+  background: #262626;
+}
