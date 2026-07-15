@@ -46,6 +46,8 @@ import type { AnalyticsStore } from './analytics/analyticsStore.js';
 import { ComposedAnalyticsStore } from './analytics/composedAnalyticsStore.js';
 import { AnalyticsService } from './analytics/analyticsService.js';
 import { analyticsRoutes } from './routes/analyticsRoutes.js';
+import { SearchService } from './search/searchService.js';
+import { searchRoutes } from './routes/searchRoutes.js';
 
 export function createApp(
   store: UserStore = new PrismaUserStore(prisma),
@@ -78,6 +80,7 @@ export function createApp(
     env.DOCUMENT_MAX_FILE_SIZE_BYTES,
   );
   const analytics = new AnalyticsService(analyticsStore);
+  const search = new SearchService(leadStore, projectStore, invoiceStore);
 
   app.use(helmet());
   app.use(cors({ origin: env.APP_ORIGIN, credentials: true }));
@@ -98,6 +101,7 @@ export function createApp(
   app.use('/api/invoices', invoiceRoutes(invoices, store));
   app.use('/api/documents', documentRoutes(documents, store));
   app.use('/api/analytics', analyticsRoutes(analytics, store));
+  app.use('/api/search', searchRoutes(search, store));
   app.use(errorHandler);
 
   return app;

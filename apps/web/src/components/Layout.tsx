@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Bell,
   BriefcaseBusiness,
@@ -7,12 +7,16 @@ import {
   FileText,
   HardHat,
   LayoutDashboard,
+  LoaderCircle,
   LogOut,
   Menu,
   ReceiptText,
+  Search,
   UsersRound,
   X,
 } from 'lucide-react';
+import type { GlobalSearchResult } from '@construction-crm/shared-types';
+import { globalSearch } from '../lib/api';
 import { useSessionStore } from '../lib/sessionStore';
 
 type LayoutProps = { children: React.ReactNode };
@@ -99,6 +103,133 @@ function UserPanel() {
   );
 }
 
+const SEARCH_TYPE_LABELS: Record<GlobalSearchResult['type'], string> = {
+  lead: 'Lead',
+  project: 'Project',
+  invoice: 'Invoice',
+};
+
+function GlobalSearchBox() {
+  const navigate = useNavigate();
+  const [term, setTerm] = useState('');
+  const [results, setResults] = useState<GlobalSearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const query = term.trim();
+    if (query.length < 2) {
+      setResults([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await globalSearch(query, 8);
+        if (!cancelled) {
+          setResults(response.results);
+          setError(null);
+          setIsOpen(true);
+        }
+      } catch (searchError) {
+        if (!cancelled) {
+          setResults([]);
+          setError(searchError instanceof Error ? searchError.message : 'Search failed');
+          setIsOpen(true);
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }, 220);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [term]);
+
+  function chooseResult(result: GlobalSearchResult) {
+    navigate(result.href);
+    setTerm('');
+    setResults([]);
+    setIsOpen(false);
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (results[0]) chooseResult(results[0]);
+  }
+
+  const showPanel = isOpen && term.trim().length >= 2;
+
+  return (
+    <div className="relative hidden lg:block">
+      <form
+        onSubmit={handleSubmit}
+        className="flex h-9 items-center gap-2 rounded-lg border border-sc-border-subtle bg-sc-surface px-3 text-xs text-sc-muted transition-colors focus-within:border-sc-amber/50"
+      >
+        <Search size={14} strokeWidth={1.8} aria-hidden="true" />
+        <input
+          aria-label="Search workspace"
+          className="w-44 bg-transparent text-xs text-sc-text outline-none placeholder:text-sc-muted"
+          placeholder="Search leads, projects, invoices"
+          value={term}
+          onBlur={() => window.setTimeout(() => setIsOpen(false), 120)}
+          onChange={(event) => setTerm(event.target.value)}
+          onFocus={() => {
+            if (term.trim().length >= 2) setIsOpen(true);
+          }}
+        />
+        {isLoading && <LoaderCircle size={14} className="animate-spin text-sc-amber" aria-hidden="true" />}
+      </form>
+
+      {showPanel && (
+        <div className="absolute right-0 top-11 z-40 w-[360px] overflow-hidden rounded-2xl border border-sc-border bg-sc-panel shadow-sc-panel">
+          <div className="border-b border-sc-border-subtle px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-sc-muted">Workspace search</p>
+          </div>
+
+          {error && <p className="px-4 py-4 text-sm text-red-300">{error}</p>}
+
+          {!error && !isLoading && results.length === 0 && (
+            <p className="px-4 py-4 text-sm text-sc-muted">No matching records found.</p>
+          )}
+
+          {!error && results.length > 0 && (
+            <div className="max-h-[360px] overflow-y-auto py-2">
+              {results.map((result) => (
+                <button
+                  key={`${result.type}-${result.id}`}
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => chooseResult(result)}
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-sc-surface"
+                >
+                  <span className="mt-0.5 rounded-full border border-sc-amber/25 bg-sc-amber/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-sc-amber">
+                    {SEARCH_TYPE_LABELS[result.type]}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-sc-bright">{result.title}</span>
+                    <span className="block truncate text-xs text-sc-muted">{result.subtitle}</span>
+                    <span className="mt-1 block text-[11px] capitalize text-sc-sub">
+                      Matched {result.matchedField} · {result.status.replace('_', ' ')}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation();
   const { user } = useSessionStore();
@@ -144,10 +275,7 @@ export function Layout({ children }: LayoutProps) {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <label className="hidden h-9 items-center gap-2 rounded-lg border border-sc-border-subtle bg-sc-surface px-3 text-xs text-sc-muted lg:flex">
-              <span className="text-sm">⌕</span>
-              <input aria-label="Search workspace" className="w-32 bg-transparent text-xs text-sc-text outline-none placeholder:text-sc-muted" placeholder="Search" />
-            </label>
+            <GlobalSearchBox />
             <button className="rounded-lg p-2.5 text-sc-muted transition-colors hover:bg-sc-surface hover:text-sc-text" aria-label="Notifications">
               <Bell size={18} strokeWidth={1.7} aria-hidden="true" />
             </button>

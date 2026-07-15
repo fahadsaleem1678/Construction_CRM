@@ -603,3 +603,22 @@ export type DashboardAnalyticsResponse = {
   spotlightProjects: DashboardProjectSpotlight[];
   alerts: DashboardAlert[];
 };
+
+// Phase 10: Polish
+
+export type GlobalSearchEntityType = 'lead' | 'project' | 'invoice';
+
+export type GlobalSearchResult = {
+  id: string;
+  type: GlobalSearchEntityType;
+  title: string;
+  subtitle: string;
+  status: string;
+  href: string;
+  matchedField: string;
+};
+
+export type GlobalSearchResponse = {
+  query: string;
+  results: GlobalSearchResult[];
+};

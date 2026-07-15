@@ -38,6 +38,7 @@ import type {
   DocumentListQuery,
   DocumentRecord,
   DashboardAnalyticsResponse,
+  GlobalSearchResponse,
 } from '@construction-crm/shared-types';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
@@ -515,4 +516,9 @@ export function getDocumentBlob(id: string) {
 
 export function getDashboardAnalytics(months = 6) {
   return apiFetch<DashboardAnalyticsResponse>(`/analytics/dashboard?months=${months}`);
+}
+
+export function globalSearch(query: string, limit = 8) {
+  const params = new URLSearchParams({ q: query, limit: String(limit) });
+  return apiFetch<GlobalSearchResponse>(`/search?${params.toString()}`);
 }
