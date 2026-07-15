@@ -6,20 +6,10 @@ export function ProtectedRoute() {
   const { user, loading } = useSessionStore();
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-paper p-6 font-mono text-[10px] text-muted tracking-widest uppercase">
-        Loading operations environment...
-      </div>
-    );
+    return <div className="grid min-h-[100dvh] place-items-center bg-sc-base p-6 text-sm text-sc-muted">Loading your workspace...</div>;
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!user) return <Navigate to="/login" replace />;
 
-  return (
-    <Layout>
-      <Outlet />
-    </Layout>
-  );
+  return <Layout><Outlet /></Layout>;
 }

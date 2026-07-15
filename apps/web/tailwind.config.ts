@@ -5,80 +5,51 @@ export default {
   theme: {
     extend: {
       colors: {
-        // SiteCore dark token system
-        'sc-base':    '#0f0f0f',   // deepest background
-        'sc-panel':   '#161616',   // panel / nav background
-        'sc-surface': '#1e1e1e',   // cards, form backgrounds
-        'sc-raised':  '#262626',   // elevated cards, hover rows
-        'sc-border':  '#2e2e2e',   // dividers, borders
-        'sc-border2': '#3d3d3d',   // stronger dividers
-        'sc-muted':   '#6b7280',   // muted text
-        'sc-sub':     '#9ca3af',   // sub text
-        'sc-text':    '#e5e7eb',   // primary text
-        'sc-bright':  '#f9fafb',   // headings, high-contrast
-        // Amber accent — single, locked
-        'sc-amber':   '#d97706',   // primary accent
-        'sc-amber-h': '#f59e0b',   // hover
-        'sc-amber-d': '#b45309',   // pressed / deep
-        'sc-amber-m': '#78350f',   // muted amber bg tint
-        // Status palette
-        'sc-green':   '#16a34a',
-        'sc-green-m': '#14532d',
-        'sc-red':     '#dc2626',
-        'sc-red-m':   '#7f1d1d',
-        'sc-blue':    '#2563eb',
-        'sc-blue-m':  '#1e3a8a',
-        'sc-yellow':  '#ca8a04',
-        'sc-yellow-m':'#713f12',
-        // Legacy compat (Layout uses these indirectly)
-        ink:     '#e5e7eb',
-        paper:   '#0f0f0f',
-        steel:   '#d97706',
-        muted:   '#6b7280',
-        line:    '#2e2e2e',
-        surface: '#1e1e1e',
-        maroon:  '#dc2626',
+        'sc-base': '#101112',
+        'sc-panel': '#131416',
+        'sc-surface': '#1a1b1e',
+        'sc-surface-strong': '#292b30',
+        'sc-raised': '#202226',
+        'sc-border': '#303237',
+        'sc-border-subtle': '#25272b',
+        'sc-border2': '#474a50',
+        'sc-muted': '#72757a',
+        'sc-sub': '#a7a8aa',
+        'sc-text': '#f0f0ed',
+        'sc-bright': '#f0f0ed',
+        'sc-amber': '#c98736',
+        'sc-amber-h': '#dfa14c',
+        'sc-amber-d': '#ad702b',
+        'sc-amber-m': '#513a22',
+        'sc-green': '#72a983',
+        'sc-green-m': '#273d30',
+        'sc-red': '#df6b61',
+        'sc-red-m': '#4b2928',
+        'sc-blue': '#819ec9',
+        'sc-blue-m': '#2d374d',
+        'sc-yellow': '#d4a55b',
+        'sc-yellow-m': '#4d3b24',
+        ink: '#f0f0ed',
+        paper: '#101112',
+        steel: '#c98736',
+        muted: '#72757a',
+        line: '#303237',
+        surface: '#1a1b1e',
+        maroon: '#df6b61',
       },
-      fontFamily: {
-        sans:  ['DM Sans', 'system-ui', 'sans-serif'],
-        mono:  ['JetBrains Mono', 'ui-monospace', 'monospace'],
-      },
-      fontSize: {
-        'xxs': ['0.625rem', { lineHeight: '0.875rem' }],
-      },
-      borderRadius: {
-        DEFAULT: '6px',
-        sm: '4px',
-        md: '6px',
-        lg: '8px',
-        xl: '10px',
-        '2xl': '12px',
-      },
+      fontFamily: { sans: ['ui-sans-serif', 'system-ui', 'sans-serif'] },
+      borderRadius: { DEFAULT: '8px', sm: '6px', md: '8px', lg: '12px', xl: '16px', '2xl': '20px' },
       boxShadow: {
-        'sc-panel':  '0 0 0 1px #2e2e2e, 0 4px 16px rgba(0,0,0,0.4)',
-        'sc-card':   '0 0 0 1px #2e2e2e, 0 2px 8px rgba(0,0,0,0.3)',
-        'sc-amber':  '0 0 0 2px #d97706',
-        'sc-focus':  '0 0 0 2px #d97706',
+        'sc-panel': '0 20px 48px rgba(0, 0, 0, 0.30)',
+        'sc-card': '0 14px 32px rgba(0, 0, 0, 0.22)',
+        'sc-amber': '0 0 0 2px rgba(201, 135, 54, 0.48)',
+        'sc-focus': '0 0 0 3px rgba(201, 135, 54, 0.32)',
       },
       keyframes: {
-        'fade-in': {
-          '0%':   { opacity: '0', transform: 'translateY(6px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        'slide-in': {
-          '0%':   { opacity: '0', transform: 'translateY(-4px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        ticker: {
-          '0%':   { transform: 'translate3d(0,0,0)' },
-          '100%': { transform: 'translate3d(-33.33%,0,0)' },
-        },
+        'fade-in': { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+        'slide-in': { '0%': { opacity: '0', transform: 'translateY(-4px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
       },
-      animation: {
-        'fade-in':  'fade-in 0.25s ease-out both',
-        'slide-in': 'slide-in 0.2s ease-out both',
-        ticker:     'ticker 32s linear infinite',
-      },
+      animation: { 'fade-in': 'fade-in 0.24s ease-out both', 'slide-in': 'slide-in 0.2s ease-out both' },
     },
   },
   plugins: [],

@@ -9,6 +9,7 @@ import type {
 } from '@construction-crm/shared-types';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
+import { ActivityStrip } from '../../components/ActivityStrip';
 import {
   listProjects,
   getProject,
@@ -44,7 +45,7 @@ function currency(v: number) {
 }
 
 const SC_SELECT = [
-  'w-full rounded-md border border-sc-border bg-sc-surface px-3 py-2 text-xs text-sc-text',
+  'w-full rounded-lg border border-sc-border bg-sc-surface px-3 py-2 text-xs text-sc-text',
   'focus:outline-none focus:border-sc-amber focus:ring-2 focus:ring-sc-amber/30',
   'transition-colors appearance-none',
 ].join(' ');
@@ -63,10 +64,10 @@ function RefreshIcon() {
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-[2px]" onClick={onClose}>
-      <div className="w-full max-w-md rounded-md border border-sc-border bg-sc-panel shadow-sc-panel" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-lg border border-sc-border bg-sc-panel shadow-sc-panel" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-sc-border px-5 py-4">
           <h2 className="text-sm font-semibold text-sc-bright">{title}</h2>
-          <button onClick={onClose} className="rounded-md border border-sc-border bg-sc-surface px-2.5 py-1 text-xs text-sc-muted hover:text-sc-text transition">Close</button>
+          <button onClick={onClose} className="rounded-lg border border-sc-border bg-sc-surface px-2.5 py-1 text-xs text-sc-muted hover:text-sc-text transition">Close</button>
         </div>
         <div className="p-5">{children}</div>
       </div>
@@ -231,17 +232,17 @@ export function ProjectsPage() {
         </div>
         <div className="flex items-center gap-2">
           <button type="button" id="refresh-projects-btn" onClick={() => void loadProjects(page)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-sc-border bg-sc-surface px-3 text-xs font-medium text-sc-sub transition hover:text-sc-text active:scale-[0.98]">
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-sc-border bg-sc-surface px-3 text-xs font-medium text-sc-sub transition hover:text-sc-text active:scale-[0.98]">
             <RefreshIcon /> Refresh
           </button>
           {isManager && (
             <>
               <button type="button" id="from-quote-btn" onClick={() => setShowFromQuoteModal(true)}
-                className="inline-flex h-8 items-center rounded-md border border-sc-border bg-sc-surface px-3 text-xs font-medium text-sc-sub transition hover:text-sc-text active:scale-[0.98]">
+                className="inline-flex h-8 items-center rounded-lg border border-sc-border bg-sc-surface px-3 text-xs font-medium text-sc-sub transition hover:text-sc-text active:scale-[0.98]">
                 From quote
               </button>
               <button type="button" id="new-project-btn" onClick={() => setShowCreateModal(true)}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-sc-amber px-3 text-xs font-semibold text-sc-base transition hover:bg-sc-amber-h active:scale-[0.98]">
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-sc-amber px-3 text-xs font-semibold text-sc-base transition hover:bg-sc-amber-h active:scale-[0.98]">
                 + New project
               </button>
             </>
@@ -250,11 +251,13 @@ export function ProjectsPage() {
       </div>
 
       {/* ── Status Filter Pills ─────────────────────────────────────────── */}
+      <ActivityStrip items={['Project milestones are ready to update', 'Assign site staff from the project workspace', 'Convert an accepted quotation into a project']} />
+
       <div className="flex flex-wrap gap-1.5">
         {(['', ...statuses] as const).map((s) => (
           <button key={s} onClick={() => setStatusFilter(s as ProjectStatus | '')}
             className={[
-              'rounded-md px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] transition',
+              'rounded-lg px-3 py-1.5 font-medium text-[10px]  tracking-[0.1em] transition',
               statusFilter === s
                 ? 'bg-sc-amber text-sc-base font-semibold'
                 : 'border border-sc-border bg-sc-surface text-sc-muted hover:text-sc-text',
@@ -265,14 +268,14 @@ export function ProjectsPage() {
       </div>
 
       {/* ── Notifications ───────────────────────────────────────────────── */}
-      {message && <div className="rounded-md border border-green-900/50 bg-sc-green-m/30 px-3 py-2.5 text-xs text-green-400 animate-slide-in" role="status">{message}</div>}
-      {error   && <div className="rounded-md border border-sc-red/40 bg-sc-red-m/30 px-3 py-2.5 text-xs text-red-400 animate-slide-in" role="alert">{error}</div>}
+      {message && <div className="rounded-lg border border-green-900/50 bg-sc-green-m/30 px-3 py-2.5 text-xs text-green-400 animate-slide-in" role="status">{message}</div>}
+      {error   && <div className="rounded-lg border border-sc-red/40 bg-sc-red-m/30 px-3 py-2.5 text-xs text-red-400 animate-slide-in" role="alert">{error}</div>}
 
       {/* ── Projects Grid ───────────────────────────────────────────────── */}
       {loading ? (
-        <div className="py-20 text-center font-mono text-[10px] uppercase tracking-widest text-sc-muted">Loading projects...</div>
+        <div className="py-20 text-center font-medium text-[10px]  tracking-widest text-sc-muted">Loading projects...</div>
       ) : projects.length === 0 ? (
-        <div className="rounded-md border border-dashed border-sc-border bg-sc-surface py-20 text-center max-w-lg mx-auto">
+        <div className="rounded-lg border border-dashed border-sc-border bg-sc-surface py-20 text-center max-w-lg mx-auto">
           <p className="text-sm font-medium text-sc-text">No projects found</p>
           <p className="mt-1 text-xs text-sc-muted">Create a new project or convert an accepted quotation.</p>
         </div>
@@ -283,7 +286,7 @@ export function ProjectsPage() {
               <div
                 key={project.id}
                 onClick={() => void openProject(project)}
-                className="cursor-pointer rounded-md border border-sc-border bg-sc-surface p-4 hover:border-sc-amber/40 hover:bg-sc-raised transition-all duration-150 flex flex-col gap-4"
+                className="cursor-pointer rounded-lg border border-sc-border bg-sc-surface p-4 hover:border-sc-amber/40 hover:bg-sc-raised transition-all duration-150 flex flex-col gap-4"
               >
                 {/* Card header */}
                 <div className="flex items-start justify-between gap-2">
@@ -291,7 +294,7 @@ export function ProjectsPage() {
                     <h3 className="text-sm font-semibold text-sc-bright truncate">{project.name}</h3>
                     <p className="text-xs text-sc-muted mt-0.5 truncate">{project.clientName}</p>
                   </div>
-                  <span className={`shrink-0 inline-flex rounded-md px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider ${statusBadge[project.status]}`}>
+                  <span className={`shrink-0 inline-flex rounded-lg px-2 py-0.5 font-medium text-[9px]  tracking-wider ${statusBadge[project.status]}`}>
                     {statusLabels[project.status]}
                   </span>
                 </div>
@@ -299,8 +302,8 @@ export function ProjectsPage() {
                 {/* Progress bar */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[10px]">
-                    <span className="font-mono text-sc-muted">Progress</span>
-                    <span className="font-mono font-semibold text-sc-amber">{project.progress ?? 0}%</span>
+                    <span className="font-medium text-sc-muted">Progress</span>
+                    <span className="font-medium font-semibold text-sc-amber">{project.progress ?? 0}%</span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-sc-raised overflow-hidden">
                     <div className="h-full rounded-full bg-sc-amber transition-all" style={{ width: `${project.progress ?? 0}%` }} />
@@ -310,12 +313,12 @@ export function ProjectsPage() {
                 {/* Budget / dates */}
                 <div className="grid grid-cols-2 divide-x divide-sc-border border-t border-sc-border pt-3 text-[10px]">
                   <div className="pr-3">
-                    <span className="block font-mono uppercase tracking-wider text-sc-muted">Budget</span>
-                    <span className="block font-mono font-semibold text-sc-amber mt-0.5">{currency(project.budget ?? 0)}</span>
+                    <span className="block font-medium  tracking-wider text-sc-muted">Budget</span>
+                    <span className="block font-medium font-semibold text-sc-amber mt-0.5">{currency(project.budget ?? 0)}</span>
                   </div>
                   <div className="pl-3">
-                    <span className="block font-mono uppercase tracking-wider text-sc-muted">Milestones</span>
-                    <span className="block font-mono font-semibold text-sc-text mt-0.5">{project.milestones?.length ?? 0} set</span>
+                    <span className="block font-medium  tracking-wider text-sc-muted">Milestones</span>
+                    <span className="block font-medium font-semibold text-sc-text mt-0.5">{project.milestones?.length ?? 0} set</span>
                   </div>
                 </div>
               </div>
@@ -326,12 +329,12 @@ export function ProjectsPage() {
           {totalProjects > pageSize && (
             <div className="flex items-center justify-center gap-3">
               <button disabled={page <= 1} onClick={() => void loadProjects(page - 1)}
-                className="h-8 rounded-md border border-sc-border bg-sc-surface px-3 text-xs text-sc-sub disabled:opacity-40 hover:bg-sc-raised transition">
+                className="h-8 rounded-lg border border-sc-border bg-sc-surface px-3 text-xs text-sc-sub disabled:opacity-40 hover:bg-sc-raised transition">
                 Prev
               </button>
-              <span className="font-mono text-[10px] text-sc-muted">Page {page}</span>
+              <span className="font-medium text-[10px] text-sc-muted">Page {page}</span>
               <button disabled={page * pageSize >= totalProjects} onClick={() => void loadProjects(page + 1)}
-                className="h-8 rounded-md border border-sc-border bg-sc-surface px-3 text-xs text-sc-sub disabled:opacity-40 hover:bg-sc-raised transition">
+                className="h-8 rounded-lg border border-sc-border bg-sc-surface px-3 text-xs text-sc-sub disabled:opacity-40 hover:bg-sc-raised transition">
                 Next
               </button>
             </div>
@@ -359,12 +362,12 @@ export function ProjectsPage() {
         <Modal title="Project from Quotation" onClose={() => setShowFromQuoteModal(false)}>
           <form onSubmit={handleCreateFromQuote} id="from-quote-form" className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-sc-sub">Select accepted quotation</label>
+              <label className="font-medium text-[10px]  tracking-[0.12em] text-sc-sub">Select accepted quotation</label>
               <select className={SC_SELECT} value={selectedQuotationId} onChange={(e) => setSelectedQuotationId(e.target.value)} required>
                 <option value="">Select quotation...</option>
                 {acceptedQuotations.map((q) => (
                   <option key={q.id} value={q.id}>
-                    {q.quotationNumber} — {q.leadClientName ?? q.leadId}
+                    {q.quotationNumber} - {q.leadClientName ?? q.leadId}
                   </option>
                 ))}
               </select>
@@ -390,12 +393,12 @@ export function ProjectsPage() {
             <div className="sticky top-0 z-10 border-b border-sc-border bg-sc-panel px-6 py-4 flex items-start justify-between">
               <div>
                 <h2 className="text-base font-semibold text-sc-bright">{selected.name}</h2>
-                <p className="font-mono text-[10px] text-sc-muted mt-0.5">{selected.clientName}</p>
+                <p className="font-medium text-[10px] text-sc-muted mt-0.5">{selected.clientName}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="rounded-md border border-sc-border bg-sc-surface px-2.5 py-1.5 text-xs font-medium text-sc-sub hover:text-sc-text transition"
+                className="rounded-lg border border-sc-border bg-sc-surface px-2.5 py-1.5 text-xs font-medium text-sc-sub hover:text-sc-text transition"
               >
                 Close
               </button>
@@ -404,33 +407,33 @@ export function ProjectsPage() {
             <div className="flex-1 p-6 space-y-6">
 
               {/* Metrics strip */}
-              <div className="grid grid-cols-3 divide-x divide-sc-border rounded-md border border-sc-border overflow-hidden">
+              <div className="grid grid-cols-3 divide-x divide-sc-border rounded-lg border border-sc-border overflow-hidden">
                 <div className="p-3">
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-sc-muted block">Status</span>
-                  <span className={`mt-1.5 inline-flex rounded-md px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider ${statusBadge[selected.status]}`}>
+                  <span className="font-medium text-[9px]  tracking-widest text-sc-muted block">Status</span>
+                  <span className={`mt-1.5 inline-flex rounded-lg px-2 py-0.5 font-medium text-[9px]  tracking-wider ${statusBadge[selected.status]}`}>
                     {statusLabels[selected.status]}
                   </span>
                 </div>
                 <div className="p-3">
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-sc-muted block">Budget</span>
-                  <span className="font-mono text-sm font-semibold text-sc-amber mt-1.5 block">{currency(selected.budget ?? 0)}</span>
+                  <span className="font-medium text-[9px]  tracking-widest text-sc-muted block">Budget</span>
+                  <span className="font-medium text-sm font-semibold text-sc-amber mt-1.5 block">{currency(selected.budget ?? 0)}</span>
                 </div>
                 <div className="p-3">
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-sc-muted block">Progress</span>
-                  <span className="font-mono text-sm font-semibold text-sc-text mt-1.5 block">{selected.progress ?? 0}%</span>
+                  <span className="font-medium text-[9px]  tracking-widest text-sc-muted block">Progress</span>
+                  <span className="font-medium text-sm font-semibold text-sc-text mt-1.5 block">{selected.progress ?? 0}%</span>
                 </div>
               </div>
 
               {/* Status + Progress controls */}
               <div className="space-y-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-sc-muted">Update status</label>
+                  <label className="font-medium text-[10px]  tracking-[0.12em] text-sc-muted">Update status</label>
                   <select className={SC_SELECT} value={selected.status} onChange={(e) => void handleUpdateStatus(selected, e.target.value as ProjectStatus)}>
                     {statuses.map((s) => <option key={s} value={s}>{statusLabels[s]}</option>)}
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-sc-muted">Progress ({selected.progress ?? 0}%)</label>
+                  <label className="font-medium text-[10px]  tracking-[0.12em] text-sc-muted">Progress ({selected.progress ?? 0}%)</label>
                   <input
                     type="range" min="0" max="100" step="5"
                     value={selected.progress ?? 0}
@@ -459,7 +462,7 @@ export function ProjectsPage() {
 
               {/* Milestones */}
               <section className="space-y-3">
-                <h3 className="font-mono text-[10px] uppercase tracking-widest text-sc-muted">Milestones</h3>
+                <h3 className="font-medium text-[10px]  tracking-widest text-sc-muted">Milestones</h3>
                 {selected.milestones && selected.milestones.length > 0 ? (
                   <div className="divide-y divide-sc-border border-y border-sc-border">
                     {selected.milestones.map((m) => (
@@ -476,14 +479,14 @@ export function ProjectsPage() {
                         </button>
                         <div className="flex-1 min-w-0">
                           <span className={`text-xs ${m.status === 'completed' ? 'line-through text-sc-muted' : 'text-sc-text'}`}>{m.title}</span>
-                          {m.dueDate && <span className="block font-mono text-[10px] text-sc-muted">{new Date(m.dueDate).toLocaleDateString()}</span>}
+                          {m.dueDate && <span className="block font-medium text-[10px] text-sc-muted">{new Date(m.dueDate).toLocaleDateString()}</span>}
                         </div>
-                        <button type="button" onClick={() => void handleDeleteMilestone(m.id)} className="text-sc-muted hover:text-red-400 transition text-xs px-1">×</button>
+                        <button type="button" onClick={() => void handleDeleteMilestone(m.id)} className="text-sc-muted hover:text-red-400 transition text-xs px-1">�-</button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="font-mono text-[10px] text-sc-muted">No milestones set.</p>
+                  <p className="font-medium text-[10px] text-sc-muted">No milestones set.</p>
                 )}
                 {isManager && (
                   <form onSubmit={handleAddMilestone} id="add-milestone-form" className="flex gap-2 pt-1">
@@ -492,36 +495,36 @@ export function ProjectsPage() {
                       value={milestoneTitle}
                       onChange={(e) => setMilestoneTitle(e.target.value)}
                       required
-                      className="flex-1 h-8 rounded-md border border-sc-border bg-sc-surface px-3 text-xs text-sc-text placeholder:text-sc-muted focus:outline-none focus:border-sc-amber focus:ring-2 focus:ring-sc-amber/30"
+                      className="flex-1 h-8 rounded-lg border border-sc-border bg-sc-surface px-3 text-xs text-sc-text placeholder:text-sc-muted focus:outline-none focus:border-sc-amber focus:ring-2 focus:ring-sc-amber/30"
                     />
                     <input
                       type="date" value={milestoneDueDate} onChange={(e) => setMilestoneDueDate(e.target.value)}
-                      className="w-32 h-8 rounded-md border border-sc-border bg-sc-surface px-2 text-xs text-sc-text focus:outline-none focus:border-sc-amber"
+                      className="w-32 h-8 rounded-lg border border-sc-border bg-sc-surface px-2 text-xs text-sc-text focus:outline-none focus:border-sc-amber"
                     />
-                    <button type="submit" className="h-8 rounded-md bg-sc-amber px-3 text-xs font-semibold text-sc-base hover:bg-sc-amber-h transition">Add</button>
+                    <button type="submit" className="h-8 rounded-lg bg-sc-amber px-3 text-xs font-semibold text-sc-base hover:bg-sc-amber-h transition">Add</button>
                   </form>
                 )}
               </section>
 
               {/* Assignments */}
               <section className="space-y-3">
-                <h3 className="font-mono text-[10px] uppercase tracking-widest text-sc-muted">Team Assignments</h3>
+                <h3 className="font-medium text-[10px]  tracking-widest text-sc-muted">Team Assignments</h3>
                 {selected.assignments && selected.assignments.length > 0 ? (
                   <div className="divide-y divide-sc-border border-y border-sc-border">
                     {selected.assignments.map((a) => (
                       <div key={a.id} className="flex items-center justify-between py-2.5">
                         <div>
                           <span className="text-xs font-medium text-sc-text">{a.userName ?? a.userId}</span>
-                          <span className="block font-mono text-[10px] text-sc-muted capitalize">{a.roleOnProject}</span>
+                          <span className="block font-medium text-[10px] text-sc-muted capitalize">{a.roleOnProject}</span>
                         </div>
                         {isManager && (
-                          <button type="button" onClick={() => void handleRemoveAssignment(a.id)} className="text-xs text-sc-muted hover:text-red-400 transition px-1">×</button>
+                          <button type="button" onClick={() => void handleRemoveAssignment(a.id)} className="text-xs text-sc-muted hover:text-red-400 transition px-1">�-</button>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="font-mono text-[10px] text-sc-muted">No team members assigned.</p>
+                  <p className="font-medium text-[10px] text-sc-muted">No team members assigned.</p>
                 )}
                 {isManager && (
                   <form onSubmit={handleAddAssignment} id="add-assignment-form" className="space-y-2 pt-1">
@@ -533,9 +536,9 @@ export function ProjectsPage() {
                       <input
                         placeholder="Role on project"
                         value={assigneeRole} onChange={(e) => setAssigneeRole(e.target.value)}
-                        className="flex-1 h-8 rounded-md border border-sc-border bg-sc-surface px-3 text-xs text-sc-text placeholder:text-sc-muted focus:outline-none focus:border-sc-amber focus:ring-2 focus:ring-sc-amber/30"
+                        className="flex-1 h-8 rounded-lg border border-sc-border bg-sc-surface px-3 text-xs text-sc-text placeholder:text-sc-muted focus:outline-none focus:border-sc-amber focus:ring-2 focus:ring-sc-amber/30"
                       />
-                      <button type="submit" className="h-8 rounded-md bg-sc-amber px-3 text-xs font-semibold text-sc-base hover:bg-sc-amber-h transition">Assign</button>
+                      <button type="submit" className="h-8 rounded-lg bg-sc-amber px-3 text-xs font-semibold text-sc-base hover:bg-sc-amber-h transition">Assign</button>
                     </div>
                   </form>
                 )}
@@ -543,18 +546,18 @@ export function ProjectsPage() {
 
               {/* Activity log */}
               <section className="space-y-3">
-                <h3 className="font-mono text-[10px] uppercase tracking-widest text-sc-muted">Activity</h3>
+                <h3 className="font-medium text-[10px]  tracking-widest text-sc-muted">Activity</h3>
                 {activities.length ? (
                   <div className="divide-y divide-sc-border border-y border-sc-border">
                     {activities.map((a) => (
                       <div key={a.id} className="py-2.5 space-y-0.5">
                         <span className="text-xs font-medium text-sc-text capitalize">{a.action.replaceAll('_', ' ')}</span>
-                        <span className="block font-mono text-[10px] text-sc-muted">{a.userName ?? 'System'} · {new Date(a.createdAt).toLocaleString()}</span>
+                        <span className="block font-medium text-[10px] text-sc-muted">{a.userName ?? 'System'} · {new Date(a.createdAt).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="font-mono text-[10px] text-sc-muted">No activity recorded.</p>
+                  <p className="font-medium text-[10px] text-sc-muted">No activity recorded.</p>
                 )}
               </section>
             </div>

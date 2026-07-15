@@ -9,6 +9,8 @@ import { QuotationsPage } from './pages/quotations/QuotationsPage';
 import { ProjectsPage } from './pages/projects/ProjectsPage';
 import { EmployeesPage } from './pages/employees/EmployeesPage';
 import { ExpensesPage } from './pages/expenses/ExpensesPage';
+import { InvoicesPage } from './pages/invoices/InvoicesPage';
+import { DocumentsPage } from './pages/documents/DocumentsPage';
 import { useSessionStore } from './lib/sessionStore';
 
 export function App() {
@@ -30,6 +32,8 @@ export function App() {
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/employees" element={<EmployeesPage />} />
           <Route path="/expenses" element={<ExpensesPage />} />
+          <Route path="/invoices" element={<InvoicesPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,8 +1,38 @@
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const apiRoot = resolve(currentDir, '..', '..');
+const workspaceRoot = resolve(apiRoot, '..', '..');
+
+for (const envPath of [resolve(workspaceRoot, '.env'), resolve(apiRoot, '.env')]) {
+  if (existsSync(envPath)) {
+    dotenv.config({ path: envPath, override: false });
+  }
+}
 
 const prisma = new PrismaClient();
 
-const tables = ['users', 'leads', 'quotations', 'quotation_items', 'activity_logs'];
+const tables = [
+  'users',
+  'user_invitations',
+  'password_reset_tokens',
+  'leads',
+  'quotations',
+  'quotation_items',
+  'activity_logs',
+  'projects',
+  'project_milestones',
+  'project_assignments',
+  'employees',
+  'expenses',
+  'invoices',
+  'invoice_items',
+  'documents',
+];
 
 async function main() {
   const migrations = await prisma.$queryRawUnsafe<Array<{ migration_name: string }>>(
@@ -27,8 +57,8 @@ async function main() {
 }
 
 main()
-  .catch(() => {
-    console.error('verification failed');
+  .catch((error) => {
+    console.error(JSON.stringify({ ok: false, message: error instanceof Error ? error.message : 'verification failed' }));
     process.exitCode = 1;
   })
   .finally(async () => {

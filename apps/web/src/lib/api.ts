@@ -25,10 +25,23 @@ import type {
   CreateMilestoneRequest,
   UpdateMilestoneRequest,
   CreateAssignmentRequest,
-  AuthUser
+  AuthUser,
+  Invoice,
+  InvoiceListQuery,
+  InvoiceListResponse,
+  UpdateInvoiceStatusRequest,
+  RecordInvoicePaymentRequest,
+  GenerateInvoiceRequest,
+  SendInvoiceRequest,
+  CreateDocumentUploadRequest,
+  CreateDocumentUploadResponse,
+  DocumentListQuery,
+  DocumentRecord,
+  DashboardAnalyticsResponse,
 } from '@construction-crm/shared-types';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
+const API_ROOT = API_BASE.replace(/\/api$/, '');
 
 let accessToken: string | null = null;
 
@@ -320,4 +333,186 @@ export function rejectExpense(id: string, rejectionNote: string) {
 
 export function deleteExpense(id: string) {
   return apiFetch<void>(`/expenses/${id}`, { method: 'DELETE' });
+}
+
+// Invoices
+
+function toInvoiceQueryString(query: InvoiceListQuery) {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value) !== '') params.set(key, String(value));
+  });
+  const text = params.toString();
+  return text ? `?${text}` : '';
+}
+
+export function listInvoices(query: InvoiceListQuery = {}) {
+  return apiFetch<InvoiceListResponse>(`/invoices${toInvoiceQueryString(query)}`);
+}
+
+export function getInvoice(id: string) {
+  return apiFetch<{ invoice: Invoice }>(`/invoices/${id}`);
+}
+
+export function generateInvoice(input: GenerateInvoiceRequest) {
+  return apiFetch<{ invoice: Invoice }>('/invoices/generate', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateInvoiceStatus(id: string, input: UpdateInvoiceStatusRequest) {
+  return apiFetch<{ invoice: Invoice }>(`/invoices/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}
+
+export function recordInvoicePayment(id: string, input: RecordInvoicePaymentRequest) {
+  return apiFetch<{ invoice: Invoice }>(`/invoices/${id}/payment`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}
+
+export function sendInvoice(id: string, input: SendInvoiceRequest) {
+  return apiFetch<{ invoice: Invoice; deliveredTo: string }>(`/invoices/${id}/send`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getInvoiceDocument(id: string) {
+  const response = await fetch(`${API_BASE}/invoices/${id}/document`, {
+    credentials: 'include',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+  });
+
+  if (response.status === 401) {
+    const refreshed = await refreshSession().catch(() => null);
+    if (refreshed) {
+      return getInvoiceDocument(id);
+    }
+  }
+
+  if (!response.ok) {
+    const error = await response.text().catch(() => 'Request failed');
+    throw new Error(error || 'Request failed');
+  }
+
+  return response.text();
+}
+
+export async function getInvoicePdf(id: string) {
+  const response = await fetch(`${API_BASE}/invoices/${id}/pdf`, {
+    credentials: 'include',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+  });
+
+  if (response.status === 401) {
+    const refreshed = await refreshSession().catch(() => null);
+    if (refreshed) {
+      return getInvoicePdf(id);
+    }
+  }
+
+  if (!response.ok) {
+    const error = await response.text().catch(() => 'Request failed');
+    throw new Error(error || 'Request failed');
+  }
+
+  return response.blob();
+}
+
+function toApiUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith('/')) return `${API_ROOT}${path}`;
+  return `${API_BASE}/${path.replace(/^\//, '')}`;
+}
+
+async function fetchBlobWithAuth(path: string) {
+  const response = await fetch(toApiUrl(path), {
+    credentials: 'include',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+  });
+
+  if (response.status === 401) {
+    const refreshed = await refreshSession().catch(() => null);
+    if (refreshed) {
+      return fetchBlobWithAuth(path);
+    }
+  }
+
+  if (!response.ok) {
+    const error = await response.text().catch(() => 'Request failed');
+    throw new Error(error || 'Request failed');
+  }
+
+  return response.blob();
+}
+
+function toDocumentQueryString(query: DocumentListQuery) {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value) !== '') params.set(key, String(value));
+  });
+  const text = params.toString();
+  return text ? `?${text}` : '';
+}
+
+export function listDocuments(query: DocumentListQuery = {}) {
+  return apiFetch<{ documents: DocumentRecord[] }>(`/documents${toDocumentQueryString(query)}`);
+}
+
+export function createDocumentUpload(input: CreateDocumentUploadRequest) {
+  return apiFetch<CreateDocumentUploadResponse>('/documents/uploads', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function uploadDocumentBinary(
+  uploadUrl: string,
+  headers: Record<string, string>,
+  file: File,
+) {
+  const response = await fetch(toApiUrl(uploadUrl), {
+    method: 'PUT',
+    credentials: uploadUrl.startsWith('/') ? 'include' : 'omit',
+    headers: {
+      ...(accessToken && uploadUrl.startsWith('/') ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...headers,
+    },
+    body: file,
+  });
+
+  if (response.status === 401 && uploadUrl.startsWith('/')) {
+    const refreshed = await refreshSession().catch(() => null);
+    if (refreshed) {
+      return uploadDocumentBinary(uploadUrl, headers, file);
+    }
+  }
+
+  if (!response.ok) {
+    const error = await response.text().catch(() => 'Upload failed');
+    throw new Error(error || 'Upload failed');
+  }
+}
+
+export function completeDocumentUpload(id: string) {
+  return apiFetch<{ document: DocumentRecord }>(`/documents/${id}/complete`, {
+    method: 'POST',
+  });
+}
+
+export function deleteDocument(id: string) {
+  return apiFetch<void>(`/documents/${id}`, { method: 'DELETE' });
+}
+
+export function getDocumentBlob(id: string) {
+  return fetchBlobWithAuth(`/documents/${id}/download`);
+}
+
+export function getDashboardAnalytics(months = 6) {
+  return apiFetch<DashboardAnalyticsResponse>(`/analytics/dashboard?months=${months}`);
 }

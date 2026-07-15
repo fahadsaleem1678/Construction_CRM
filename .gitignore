@@ -8,3 +8,5 @@ apps/web/dist
 apps/api/prisma/dev.db
 .env.example
 .pnpm-store
+apps/api/uploads
+.startup-logs

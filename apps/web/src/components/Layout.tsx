@@ -1,154 +1,161 @@
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  Bell,
+  BriefcaseBusiness,
+  FolderOpen,
+  FileText,
+  HardHat,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  ReceiptText,
+  UsersRound,
+  X,
+} from 'lucide-react';
 import { useSessionStore } from '../lib/sessionStore';
 
-type LayoutProps = {
-  children: React.ReactNode;
-};
+type LayoutProps = { children: React.ReactNode };
 
 const NAV_ITEMS = [
-  { to: '/',            label: 'Dashboard' },
-  { to: '/leads',       label: 'Leads'     },
-  { to: '/quotations',  label: 'Quotations'},
-  { to: '/projects',    label: 'Projects'  },
-  { to: '/employees',   label: 'Employees' },
-  { to: '/expenses',    label: 'Expenses'  },
+  { to: '/', label: 'Overview', icon: LayoutDashboard },
+  { to: '/leads', label: 'Leads', icon: UsersRound },
+  { to: '/quotations', label: 'Quotations', icon: FileText },
+  { to: '/projects', label: 'Projects', icon: BriefcaseBusiness },
+  { to: '/expenses', label: 'Expenses', icon: ReceiptText },
+  { to: '/invoices', label: 'Invoices', icon: FileText },
+  { to: '/documents', label: 'Documents', icon: FolderOpen },
+  { to: '/employees', label: 'Employees', icon: HardHat },
 ];
 
-const TICKER_TEXT =
-  'SITE A: ACTIVE — CREW ALPHA DEPLOYED • SITE B: CONCRETE POUR COMPLETE • SITE C: ELECTRICAL PHASE UNDERWAY • NEW QUOTATION SUBMITTED • MATERIALS PROCUREMENT CONFIRMED • MILESTONE: STRUCTURAL STEEL SIGNED OFF • SYSTEM NOMINAL';
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'Overview',
+  '/leads': 'Leads',
+  '/quotations': 'Quotations',
+  '/projects': 'Projects',
+  '/expenses': 'Expenses',
+  '/invoices': 'Invoices',
+  '/documents': 'Documents',
+  '/employees': 'Employees',
+};
 
-/** SiteCore wordmark — inline SVG hex-diamond mark + logotype */
 function SiteCoreMark() {
   return (
-    <div className="flex items-center gap-2.5 select-none">
-      {/* Geometric hexagon mark */}
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-        <polygon
-          points="13,1 24,7 24,19 13,25 2,19 2,7"
-          fill="#d97706"
-          stroke="#f59e0b"
-          strokeWidth="0.5"
-        />
-        <polygon
-          points="13,6 20,10 20,16 13,20 6,16 6,10"
-          fill="#0f0f0f"
-          stroke="#d97706"
-          strokeWidth="0.75"
-        />
-        <line x1="13" y1="10" x2="13" y2="16" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="10" y1="12" x2="16" y2="12" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-      <div className="leading-none">
-        <span className="block text-sm font-semibold tracking-tight text-sc-bright">SiteCore</span>
-        <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-sc-muted mt-0.5">Construction CRM</span>
+    <div className="flex items-center gap-3">
+      <div className="grid h-9 w-9 place-items-center rounded-xl border border-sc-amber/30 bg-sc-amber/10 text-sc-amber">
+        <HardHat size={18} strokeWidth={1.8} aria-hidden="true" />
+      </div>
+      <div>
+        <span className="block text-[15px] font-semibold tracking-tight text-sc-bright">SiteCore</span>
+        <span className="block text-[11px] text-sc-muted">Construction CRM</span>
+      </div>
+    </div>
+  );
+}
+
+function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <nav aria-label="Primary navigation" className="flex flex-col gap-1">
+      {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+        <NavLink
+          key={to}
+          to={to}
+          end={to === '/'}
+          onClick={onNavigate}
+          className={({ isActive }) => [
+            'group relative flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors',
+            isActive
+              ? 'bg-sc-amber/10 text-sc-bright before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-sc-amber'
+              : 'text-sc-sub hover:bg-sc-surface hover:text-sc-text',
+          ].join(' ')}
+        >
+          <Icon size={18} strokeWidth={1.7} className="text-sc-muted transition-colors group-hover:text-sc-amber" aria-hidden="true" />
+          {label}
+        </NavLink>
+      ))}
+    </nav>
+  );
+}
+
+function UserPanel() {
+  const { user, logoutUser } = useSessionStore();
+  const initials = user?.name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() ?? 'SC';
+
+  return (
+    <div className="border-t border-sc-border-subtle pt-4">
+      <div className="flex items-center gap-3 px-3">
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sc-surface-strong text-xs font-semibold text-sc-amber">
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-sc-text">{user?.name}</p>
+          <p className="truncate text-xs capitalize text-sc-muted">{user?.role}</p>
+        </div>
+        <button onClick={logoutUser} className="rounded-lg p-2 text-sc-muted transition-colors hover:bg-sc-surface hover:text-sc-text" aria-label="Log out" title="Log out">
+          <LogOut size={17} strokeWidth={1.7} aria-hidden="true" />
+        </button>
       </div>
     </div>
   );
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { user, logoutUser } = useSessionStore();
+  const { pathname } = useLocation();
+  const { user } = useSessionStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const initials = user?.name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() ?? 'SC';
+  const date = new Intl.DateTimeFormat('en-PK', { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date());
 
   return (
-    <div className="min-h-screen bg-sc-base text-sc-text flex flex-col">
+    <div className="min-h-[100dvh] bg-sc-base text-sc-text">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sc-border-subtle bg-sc-panel px-4 py-5 md:flex">
+        <SiteCoreMark />
+        <div className="mt-9 flex-1">
+          <Navigation />
+        </div>
+        <UserPanel />
+      </aside>
 
-      {/* ── Top Navigation ──────────────────────────────────────────────── */}
-      <nav
-        className="sticky top-0 z-30 w-full border-b border-sc-border bg-sc-panel/95 backdrop-blur-md"
-        style={{ height: '56px' }}
-      >
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-5">
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button className="absolute inset-0 bg-black/60" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} />
+          <aside className="relative z-10 flex h-full w-[276px] flex-col border-r border-sc-border bg-sc-panel p-5 shadow-sc-panel">
+            <div className="flex items-center justify-between">
+              <SiteCoreMark />
+              <button onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-2 text-sc-muted hover:bg-sc-surface hover:text-sc-text" aria-label="Close navigation">
+                <X size={19} strokeWidth={1.7} aria-hidden="true" />
+              </button>
+            </div>
+            <div className="mt-9 flex-1"><Navigation onNavigate={() => setMobileMenuOpen(false)} /></div>
+            <UserPanel />
+          </aside>
+        </div>
+      )}
 
-          {/* Brand */}
-          <SiteCoreMark />
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === '/'}
-                className={({ isActive }) =>
-                  [
-                    'relative px-4 py-[18px] text-sm font-medium transition-colors duration-150',
-                    'after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[2px] after:rounded-full after:transition-all after:duration-150',
-                    isActive
-                      ? 'text-sc-amber after:bg-sc-amber'
-                      : 'text-sc-muted hover:text-sc-text after:bg-transparent',
-                  ].join(' ')
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
-
-          {/* User + Logout */}
+      <div className="min-h-[100dvh] md:pl-[260px]">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-sc-border-subtle bg-sc-base/95 px-4 backdrop-blur md:h-[72px] md:px-8">
           <div className="flex items-center gap-3">
-            {user && (
-              <div className="hidden sm:flex items-center gap-2.5 border-r border-sc-border pr-3">
-                <div className="flex flex-col items-end leading-none">
-                  <span className="text-xs font-medium text-sc-text">{user.name}</span>
-                  <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-sc-amber mt-0.5">
-                    {user.role}
-                  </span>
-                </div>
-              </div>
-            )}
-            <button
-              id="logout-btn"
-              onClick={logoutUser}
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-sc-border bg-sc-surface px-3 text-xs font-medium text-sc-sub transition hover:border-sc-border2 hover:text-sc-text active:scale-[0.98]"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-              Logout
+            <button onClick={() => setMobileMenuOpen(true)} className="rounded-lg p-2 text-sc-sub hover:bg-sc-surface md:hidden" aria-label="Open navigation">
+              <Menu size={20} strokeWidth={1.7} aria-hidden="true" />
             </button>
+            <div>
+              <h1 className="text-base font-semibold tracking-tight text-sc-bright md:text-lg">{PAGE_TITLES[pathname] ?? 'SiteCore'}</h1>
+              <p className="hidden text-xs text-sc-muted sm:block">{date}</p>
+            </div>
           </div>
-        </div>
-      </nav>
-
-      {/* ── Ticker Strip ────────────────────────────────────────────────── */}
-      <div
-        className="w-full overflow-hidden border-b border-sc-border bg-sc-panel py-1.5 select-none"
-        aria-hidden="true"
-      >
-        <div className="animate-ticker flex gap-16 font-mono text-[9px] uppercase tracking-[0.18em] text-sc-amber/70">
-          <span>{TICKER_TEXT}</span>
-          <span>{TICKER_TEXT}</span>
-          <span>{TICKER_TEXT}</span>
-        </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <label className="hidden h-9 items-center gap-2 rounded-lg border border-sc-border-subtle bg-sc-surface px-3 text-xs text-sc-muted lg:flex">
+              <span className="text-sm">⌕</span>
+              <input aria-label="Search workspace" className="w-32 bg-transparent text-xs text-sc-text outline-none placeholder:text-sc-muted" placeholder="Search" />
+            </label>
+            <button className="rounded-lg p-2.5 text-sc-muted transition-colors hover:bg-sc-surface hover:text-sc-text" aria-label="Notifications">
+              <Bell size={18} strokeWidth={1.7} aria-hidden="true" />
+            </button>
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-sc-surface-strong text-xs font-semibold text-sc-amber">{initials}</div>
+          </div>
+        </header>
+        <main className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 md:px-8 md:py-8">{children}</main>
       </div>
-
-      {/* ── Mobile Nav ──────────────────────────────────────────────────── */}
-      <div className="flex md:hidden overflow-x-auto border-b border-sc-border bg-sc-panel px-4 py-2 gap-1">
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              [
-                'flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors',
-                isActive
-                  ? 'bg-sc-amber/10 text-sc-amber'
-                  : 'text-sc-muted hover:text-sc-text',
-              ].join(' ')
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </div>
-
-      {/* ── Page Content ────────────────────────────────────────────────── */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-5 py-6">
-        {children}
-      </main>
     </div>
   );
 }

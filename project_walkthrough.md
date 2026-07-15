@@ -46,7 +46,7 @@ graph TD
 
 ## What's Built vs. What's Remaining
 
-### ✅ Already Built (Phases 1–6)
+### ✅ Already Built (Phases 1–9)
 
 ```
 Phase 1 — Foundation & Auth          ██████████ DONE
@@ -55,6 +55,9 @@ Phase 3 — Quotations                 ██████████ DONE
 Phase 4 — Projects                   ██████████ DONE
 Phase 5 — Employees                  ██████████ DONE
 Phase 6 — Expenses                   ██████████ DONE
+Phase 7 — Invoices                   ██████████ DONE
+Phase 8 — Document Uploads           ██████████ DONE
+Phase 9 — Dashboard & Analytics      ██████████ DONE
 ```
 
 **What you can do right now:**
@@ -64,17 +67,17 @@ Phase 6 — Expenses                   ██████████ DONE
 - 🏗️ Convert accepted quotations to projects, define milestones, and assign employees
 - 👷 Manage employees and job roles (salaries only visible to owner/admin/accountant)
 - 💰 Submit, approve, or reject expense claims per project
+- 🧾 Generate invoices, PDFs, email-ready invoice records, and overdue reminders
+- 📁 Upload and preview documents through local or Cloudflare R2 storage
+- 📊 View role-aware dashboard analytics for pipeline, projects, invoices, and expenses
 - 🛡️ Role-based access control across all modules
 
 ---
 
-### 🔜 Still Needs To Be Built (Phases 7–13)
+### 🔜 Still Needs To Be Built (Phases 10–13)
 
 ```
-Phase 7  — Invoices                  ░░░░░░░░░░ TODO ← NEXT
-Phase 8  — Document Uploads          ░░░░░░░░░░ TODO
-Phase 9  — Dashboard & Analytics     ░░░░░░░░░░ TODO
-Phase 10 — Polish                    ░░░░░░░░░░ TODO
+Phase 10 — Polish                    ░░░░░░░░░░ TODO ← NEXT
 Phase 11 — Testing                   ░░░░░░░░░░ TODO
 Phase 12 — Deployment                ░░░░░░░░░░ TODO
 Phase 13 — Portfolio Packaging       ░░░░░░░░░░ TODO
@@ -84,7 +87,7 @@ Phase 13 — Portfolio Packaging       ░░░░░░░░░░ TODO
 
 ## Phase-by-Phase: What Each One Delivers
 
-### Phase 4 — Projects 🏗️ *(Next Up)*
+### Phase 4 — Projects 🏗️
 
 > **"A client said yes — now manage the actual construction work"**
 
@@ -116,10 +119,10 @@ Phase 13 — Portfolio Packaging       ░░░░░░░░░░ TODO
 
 > **"Bill the client professionally"**
 
-- Generate invoices from project data (pull in quotation line items and expenses)
-- **PDF generation** with company letterhead — looks professional
+- Generate invoices from project data (pull in quotation line items and approved expenses)
+- **PDF generation** with branded layout and browser preview/download
 - Track payment status: `Draft → Sent → Partially Paid → Paid → Overdue`
-- **Automatic overdue detection** — system emails reminders for unpaid invoices
+- **Automatic overdue detection** with persisted reminder count and timestamps
 - Email invoices directly to clients
 
 ### Phase 8 — Document Uploads 📁
@@ -127,7 +130,7 @@ Phase 13 — Portfolio Packaging       ░░░░░░░░░░ TODO
 > **"All files in one place"**
 
 - Upload and attach files to any entity (lead, project, employee, invoice)
-- Files stored in **Cloudflare R2** (cloud storage) via secure presigned URLs
+- Files stored through a document storage abstraction with **Cloudflare R2-compatible** presigned uploads and a local-dev fallback
 - Preview PDFs and images directly in the browser
 - File type and size validation
 
@@ -246,6 +249,6 @@ When all 13 phases are complete, the construction company owner gets:
 ## Summary
 
 > [!IMPORTANT]
-> **In a nutshell**: This is a full-stack construction business management CRM. We've built the foundations, leads, quotations, projects, employees, and expenses modules. Next we build invoice generation, then layer on file storage, analytics, polish, testing, and deploy it live.
+> **In a nutshell**: This is a full-stack construction business management CRM. We've built the core lead-to-invoice workflow, including auth, leads, quotations, projects, employees, expenses, invoices, document uploads, and dashboard analytics. Next we polish the operator experience, then expand testing, deployment, and portfolio packaging.
 >
-> **Progress: ~46% complete** (6 of 13 phases done). The system's core entities and access patterns are established — next up is billing.
+> **Progress: ~69% complete** (9 of 13 delivery phases done). The core business workflow is now established — next up is production-readiness polish.

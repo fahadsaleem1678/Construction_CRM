@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type { CreateLeadRequest, Lead, LeadActivity, LeadSource, LeadStatus } from '@construction-crm/shared-types';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
+import { ActivityStrip } from '../../components/ActivityStrip';
 import {
   createLead,
   deleteLead,
@@ -37,15 +38,15 @@ function currency(v: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
 }
 
-/** Shared select style — dark themed */
+/** Shared select style - dark themed */
 const SC_SELECT = [
-  'w-full rounded-md border border-sc-border bg-sc-surface px-3 py-2 text-xs text-sc-text',
+  'w-full rounded-lg border border-sc-border bg-sc-surface px-3 py-2 text-xs text-sc-text',
   'focus:outline-none focus:border-sc-amber focus:ring-2 focus:ring-sc-amber/30',
   'transition-colors appearance-none',
 ].join(' ');
 
 const SC_TEXTAREA = [
-  'min-h-[80px] w-full rounded-md border border-sc-border bg-sc-surface px-3 py-2 text-xs text-sc-text placeholder:text-sc-muted',
+  'min-h-[80px] w-full rounded-lg border border-sc-border bg-sc-surface px-3 py-2 text-xs text-sc-text placeholder:text-sc-muted',
   'focus:outline-none focus:border-sc-amber focus:ring-2 focus:ring-sc-amber/30',
   'resize-none transition-colors',
 ].join(' ');
@@ -133,7 +134,7 @@ export function LeadsPage() {
             type="button"
             id="refresh-leads-btn"
             onClick={() => void loadLeads(page)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-sc-border bg-sc-surface px-3 text-xs font-medium text-sc-sub transition hover:text-sc-text active:scale-[0.98]"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-sc-border bg-sc-surface px-3 text-xs font-medium text-sc-sub transition hover:text-sc-text active:scale-[0.98]"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
             Refresh
@@ -142,7 +143,7 @@ export function LeadsPage() {
             type="button"
             id="toggle-view-btn"
             onClick={() => setView(view === 'table' ? 'kanban' : 'table')}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-sc-raised border border-sc-border2 px-3 text-xs font-medium text-sc-text transition hover:bg-sc-border active:scale-[0.98]"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-sc-raised border border-sc-border2 px-3 text-xs font-medium text-sc-text transition hover:bg-sc-border active:scale-[0.98]"
           >
             {view === 'table' ? 'Kanban' : 'Table'}
           </button>
@@ -150,6 +151,8 @@ export function LeadsPage() {
       </div>
 
       {/* ── Two-column: form sidebar + content ─────────────────────────── */}
+      <ActivityStrip items={['New lead intake is available', 'Track qualification across the pipeline', 'Start a quotation from any qualified lead']} />
+
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
 
         {/* Sidebar */}
@@ -157,20 +160,20 @@ export function LeadsPage() {
 
           {/* Create lead form */}
           <section>
-            <h2 className="mb-4 font-mono text-[10px] uppercase tracking-[0.15em] text-sc-muted">New Lead</h2>
+            <h2 className="mb-4 font-medium text-[10px]  tracking-[0.15em] text-sc-muted">New Lead</h2>
             <form onSubmit={submitLead} id="create-lead-form" className="space-y-3">
               <TextField label="Client name" value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} required />
               <TextField label="Phone" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} required />
               <TextField label="Email" type="email" value={form.contactEmail ?? ''} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} />
               <TextField label="Estimated value" type="number" min="0" value={form.estimatedValue ?? 0} onChange={(e) => setForm({ ...form, estimatedValue: Number(e.target.value) })} />
               <div className="flex flex-col gap-1.5">
-                <label className="font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-sc-sub">Source</label>
+                <label className="font-medium text-[10px] font-medium  tracking-[0.12em] text-sc-sub">Source</label>
                 <select className={SC_SELECT} value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value as LeadSource })}>
                   {sources.map((s) => <option key={s} value={s}>{sourceLabels[s]}</option>)}
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-sc-sub">Notes</label>
+                <label className="font-medium text-[10px] font-medium  tracking-[0.12em] text-sc-sub">Notes</label>
                 <textarea className={SC_TEXTAREA} value={form.notes ?? ''} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
               </div>
               <Button type="submit" className="w-full h-9 text-xs">Create lead</Button>
@@ -179,7 +182,7 @@ export function LeadsPage() {
 
           {/* Filters */}
           <section className="border-t border-sc-border pt-6 space-y-3">
-            <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-sc-muted">Filter</h2>
+            <h2 className="font-medium text-[10px]  tracking-[0.15em] text-sc-muted">Filter</h2>
             <select className={SC_SELECT} value={status} onChange={(e) => setStatus(e.target.value as LeadStatus | '')}>
               <option value="">All statuses</option>
               {statuses.map((s) => <option key={s} value={s}>{statusLabels[s]}</option>)}
@@ -194,46 +197,46 @@ export function LeadsPage() {
         {/* Content */}
         <section className="space-y-4 min-w-0">
           {message && (
-            <div className="rounded-md border border-green-900/50 bg-sc-green-m/30 px-3 py-2.5 text-xs text-green-400 animate-slide-in" role="status">{message}</div>
+            <div className="rounded-lg border border-green-900/50 bg-sc-green-m/30 px-3 py-2.5 text-xs text-green-400 animate-slide-in" role="status">{message}</div>
           )}
           {error && (
-            <div className="rounded-md border border-sc-red/40 bg-sc-red-m/30 px-3 py-2.5 text-xs text-red-400 animate-slide-in" role="alert">{error}</div>
+            <div className="rounded-lg border border-sc-red/40 bg-sc-red-m/30 px-3 py-2.5 text-xs text-red-400 animate-slide-in" role="alert">{error}</div>
           )}
 
           <div className="flex items-center justify-between border-b border-sc-border pb-3">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-sc-muted">
+            <span className="font-medium text-[10px]  tracking-widest text-sc-muted">
               {leads.length} of {total} leads
             </span>
             {total > pageSize && (
               <div className="flex items-center gap-2">
-                <button disabled={page <= 1} onClick={() => void loadLeads(page - 1)} className="h-7 rounded-md border border-sc-border bg-sc-surface px-2.5 text-[11px] text-sc-sub disabled:opacity-40 hover:bg-sc-raised">Prev</button>
-                <span className="font-mono text-[10px] text-sc-muted">Page {page}</span>
-                <button disabled={page * pageSize >= total} onClick={() => void loadLeads(page + 1)} className="h-7 rounded-md border border-sc-border bg-sc-surface px-2.5 text-[11px] text-sc-sub disabled:opacity-40 hover:bg-sc-raised">Next</button>
+                <button disabled={page <= 1} onClick={() => void loadLeads(page - 1)} className="h-7 rounded-lg border border-sc-border bg-sc-surface px-2.5 text-[11px] text-sc-sub disabled:opacity-40 hover:bg-sc-raised">Prev</button>
+                <span className="font-medium text-[10px] text-sc-muted">Page {page}</span>
+                <button disabled={page * pageSize >= total} onClick={() => void loadLeads(page + 1)} className="h-7 rounded-lg border border-sc-border bg-sc-surface px-2.5 text-[11px] text-sc-sub disabled:opacity-40 hover:bg-sc-raised">Next</button>
               </div>
             )}
           </div>
 
           {loading && (
-            <div className="py-16 text-center font-mono text-[10px] uppercase tracking-widest text-sc-muted">
+            <div className="py-16 text-center font-medium text-[10px]  tracking-widest text-sc-muted">
               Loading leads...
             </div>
           )}
 
           {/* Table view */}
           {!loading && view === 'table' && (
-            <div className="overflow-x-auto rounded-md border border-sc-border">
+            <div className="overflow-x-auto rounded-lg border border-sc-border">
               <table className="w-full min-w-[680px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-sc-border bg-sc-panel">
                     {['Client', 'Contact', 'Source', 'Value', 'Status', ''].map((h) => (
-                      <th key={h} className={`px-4 py-3 font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-sc-muted ${h === '' ? 'text-right' : ''}`}>{h}</th>
+                      <th key={h} className={`px-4 py-3 font-medium text-[9px] font-medium  tracking-[0.15em] text-sc-muted ${h === '' ? 'text-right' : ''}`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-sc-border bg-sc-surface">
                   {leads.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center font-mono text-[10px] uppercase tracking-widest text-sc-muted">
+                      <td colSpan={6} className="px-4 py-12 text-center font-medium text-[10px]  tracking-widest text-sc-muted">
                         No leads found. Add one using the form.
                       </td>
                     </tr>
@@ -245,12 +248,12 @@ export function LeadsPage() {
                         {lead.contactEmail && <div className="text-[10px] mt-0.5 text-sc-muted/70">{lead.contactEmail}</div>}
                       </td>
                       <td className="px-4 py-3 text-sc-sub">{sourceLabels[lead.source]}</td>
-                      <td className="px-4 py-3 font-mono font-medium text-sc-text">{currency(lead.estimatedValue)}</td>
+                      <td className="px-4 py-3 font-medium font-medium text-sc-text">{currency(lead.estimatedValue)}</td>
                       <td className="px-4 py-3">
                         <select
                           value={lead.status}
                           onChange={(e) => void changeStatus(lead, e.target.value as LeadStatus)}
-                          className="rounded-md border border-sc-border bg-sc-raised px-2 py-1 text-[11px] text-sc-text focus:outline-none focus:border-sc-amber appearance-none"
+                          className="rounded-lg border border-sc-border bg-sc-raised px-2 py-1 text-[11px] text-sc-text focus:outline-none focus:border-sc-amber appearance-none"
                         >
                           {statuses.map((s) => <option key={s} value={s}>{statusLabels[s]}</option>)}
                         </select>
@@ -259,7 +262,7 @@ export function LeadsPage() {
                         <button
                           type="button"
                           onClick={() => void openLead(lead)}
-                          className="inline-flex h-7 items-center gap-1 rounded-md border border-sc-border bg-sc-panel px-2.5 text-[10px] font-medium text-sc-sub hover:text-sc-text hover:bg-sc-raised transition active:scale-[0.98]"
+                          className="inline-flex h-7 items-center gap-1 rounded-lg border border-sc-border bg-sc-panel px-2.5 text-[10px] font-medium text-sc-sub hover:text-sc-text hover:bg-sc-raised transition active:scale-[0.98]"
                         >
                           Details
                         </button>
@@ -276,12 +279,12 @@ export function LeadsPage() {
             <div className="overflow-x-auto pb-4">
               <div className="grid min-w-[900px] grid-cols-6 gap-3 items-start">
                 {pipeline.map((column) => (
-                  <div key={column.status} className="rounded-md border border-sc-border bg-sc-surface p-2.5 space-y-2">
+                  <div key={column.status} className="rounded-lg border border-sc-border bg-sc-surface p-2.5 space-y-2">
                     <div className="flex items-center justify-between border-b border-sc-border pb-2">
-                      <span className="font-mono text-[9px] uppercase tracking-widest text-sc-muted font-medium">
+                      <span className="font-medium text-[9px]  tracking-widest text-sc-muted font-medium">
                         {statusLabels[column.status]}
                       </span>
-                      <span className="rounded bg-sc-raised border border-sc-border2 px-1.5 py-0.5 font-mono text-[9px] text-sc-muted">
+                      <span className="rounded bg-sc-raised border border-sc-border2 px-1.5 py-0.5 font-medium text-[9px] text-sc-muted">
                         {column.leads.length}
                       </span>
                     </div>
@@ -290,10 +293,10 @@ export function LeadsPage() {
                         <div
                           key={lead.id}
                           onClick={() => void openLead(lead)}
-                          className="rounded-md border border-sc-border bg-sc-panel p-2.5 cursor-pointer transition hover:border-sc-amber/40 hover:bg-sc-raised active:scale-[0.99] space-y-1.5"
+                          className="rounded-lg border border-sc-border bg-sc-panel p-2.5 cursor-pointer transition hover:border-sc-amber/40 hover:bg-sc-raised active:scale-[0.99] space-y-1.5"
                         >
                           <div className="text-xs font-medium text-sc-bright leading-tight">{lead.clientName}</div>
-                          <div className="flex items-center justify-between font-mono text-[9px] text-sc-muted">
+                          <div className="flex items-center justify-between font-medium text-[9px] text-sc-muted">
                             <span>{sourceLabels[lead.source]}</span>
                             <span className="text-sc-sub">{currency(lead.estimatedValue)}</span>
                           </div>
@@ -319,30 +322,30 @@ export function LeadsPage() {
             <div className="flex items-start justify-between border-b border-sc-border pb-4">
               <div className="space-y-1">
                 <h2 className="text-lg font-semibold text-sc-bright leading-tight">{selected.clientName}</h2>
-                <p className="font-mono text-[10px] text-sc-muted">
+                <p className="font-medium text-[10px] text-sc-muted">
                   {selected.contactPhone}{selected.contactEmail ? ` · ${selected.contactEmail}` : ''}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="rounded-md border border-sc-border bg-sc-surface px-2.5 py-1.5 text-xs font-medium text-sc-sub hover:text-sc-text transition"
+                className="rounded-lg border border-sc-border bg-sc-surface px-2.5 py-1.5 text-xs font-medium text-sc-sub hover:text-sc-text transition"
               >
                 Close
               </button>
             </div>
 
             {/* Metrics */}
-            <div className="grid grid-cols-2 divide-x divide-sc-border rounded-md border border-sc-border overflow-hidden">
+            <div className="grid grid-cols-2 divide-x divide-sc-border rounded-lg border border-sc-border overflow-hidden">
               <div className="p-3">
-                <span className="font-mono text-[9px] uppercase tracking-widest text-sc-muted">Status</span>
-                <span className={`mt-1.5 block text-xs font-semibold px-2 py-0.5 rounded-md w-fit ${statusBadge[selected.status]}`}>
+                <span className="font-medium text-[9px]  tracking-widest text-sc-muted">Status</span>
+                <span className={`mt-1.5 block text-xs font-semibold px-2 py-0.5 rounded-lg w-fit ${statusBadge[selected.status]}`}>
                   {statusLabels[selected.status]}
                 </span>
               </div>
               <div className="p-3">
-                <span className="font-mono text-[9px] uppercase tracking-widest text-sc-muted">Budget est.</span>
-                <span className="mt-1.5 block font-mono text-sm font-semibold text-sc-amber">{currency(selected.estimatedValue)}</span>
+                <span className="font-medium text-[9px]  tracking-widest text-sc-muted">Budget est.</span>
+                <span className="mt-1.5 block font-medium text-sm font-semibold text-sc-amber">{currency(selected.estimatedValue)}</span>
               </div>
             </div>
 
@@ -358,15 +361,15 @@ export function LeadsPage() {
 
             {/* Notes */}
             <section className="space-y-2">
-              <h3 className="font-mono text-[10px] uppercase tracking-widest text-sc-muted">Notes</h3>
-              <p className="rounded-md border border-sc-border bg-sc-surface p-3 text-xs leading-relaxed text-sc-sub whitespace-pre-wrap">
+              <h3 className="font-medium text-[10px]  tracking-widest text-sc-muted">Notes</h3>
+              <p className="rounded-lg border border-sc-border bg-sc-surface p-3 text-xs leading-relaxed text-sc-sub whitespace-pre-wrap">
                 {selected.notes || 'No notes recorded.'}
               </p>
             </section>
 
             {/* Activity log */}
             <section className="space-y-3">
-              <h3 className="font-mono text-[10px] uppercase tracking-widest text-sc-muted">Activity</h3>
+              <h3 className="font-medium text-[10px]  tracking-widest text-sc-muted">Activity</h3>
               {activities.length ? (
                 <div className="divide-y divide-sc-border border-y border-sc-border">
                   {activities.map((a) => (
@@ -374,14 +377,14 @@ export function LeadsPage() {
                       <div className="text-xs font-medium text-sc-text capitalize">
                         {a.action.replaceAll('_', ' ')}
                       </div>
-                      <div className="font-mono text-[10px] text-sc-muted">
+                      <div className="font-medium text-[10px] text-sc-muted">
                         {a.userName ?? 'System'} · {new Date(a.createdAt).toLocaleString()}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="font-mono text-[10px] text-sc-muted">No activity recorded yet.</p>
+                <p className="font-medium text-[10px] text-sc-muted">No activity recorded yet.</p>
               )}
             </section>
           </aside>

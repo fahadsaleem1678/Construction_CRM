@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Layout } from '../../components/Layout';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
 import {
@@ -26,14 +25,14 @@ function statusBadge(status: EmploymentStatus) {
   };
   const { label, cls } = map[status] ?? map.active;
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-mono uppercase tracking-widest ${cls}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium  tracking-widest ${cls}`}>
       {label}
     </span>
   );
 }
 
 function money(v: number | null) {
-  if (v === null) return '—';
+  if (v === null) return '-';
   return new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(v);
 }
 
@@ -203,24 +202,24 @@ export function EmployeesPage() {
   ];
 
   return (
-    <Layout>
+    <>
       {/* Header */}
       <div className="border-b border-sc-border bg-sc-base sticky top-[56px] z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-lg font-semibold text-sc-bright tracking-tight">Employees</h1>
-            <p className="text-xs text-sc-muted mt-0.5 font-mono">
+            <p className="text-xs text-sc-muted mt-0.5 font-medium">
               {loading ? 'Loading…' : `${total} record${total !== 1 ? 's' : ''}`}
             </p>
           </div>
           <div className="flex items-center gap-3">
             {/* Status filter pills */}
-            <div className="flex items-center gap-1 bg-sc-surface rounded-md border border-sc-border p-0.5">
+            <div className="flex items-center gap-1 bg-sc-surface rounded-lg border border-sc-border p-0.5">
               {STATUS_FILTERS.map(f => (
                 <button
                   key={f.value}
                   onClick={() => setStatusFilter(f.value)}
-                  className={`px-3 py-1 text-xs font-mono rounded transition-colors ${
+                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
                     statusFilter === f.value
                       ? 'bg-sc-amber text-sc-base font-semibold'
                       : 'text-sc-muted hover:text-sc-text'
@@ -242,7 +241,7 @@ export function EmployeesPage() {
       {/* Body */}
       <div className="max-w-7xl mx-auto px-6 py-6">
         {error && (
-          <div className="mb-4 p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm" role="alert">
+          <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm" role="alert">
             {error}
           </div>
         )}
@@ -250,24 +249,24 @@ export function EmployeesPage() {
         {loading ? (
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 rounded-md bg-sc-surface animate-pulse" />
+              <div key={i} className="h-16 rounded-lg bg-sc-surface animate-pulse" />
             ))}
           </div>
         ) : employees.length === 0 ? (
           <EmptyState onAdd={canEdit ? openCreate : () => {}} />
         ) : (
-          <div className="rounded-md border border-sc-border overflow-hidden">
+          <div className="rounded-lg border border-sc-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-sc-border bg-sc-surface">
-                  <th className="px-4 py-2.5 text-left text-[10px] font-mono uppercase tracking-widest text-sc-muted">Employee</th>
-                  <th className="px-4 py-2.5 text-left text-[10px] font-mono uppercase tracking-widest text-sc-muted">Job Title</th>
-                  <th className="px-4 py-2.5 text-left text-[10px] font-mono uppercase tracking-widest text-sc-muted">Contact</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-medium  tracking-widest text-sc-muted">Employee</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-medium  tracking-widest text-sc-muted">Job Title</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-medium  tracking-widest text-sc-muted">Contact</th>
                   {canSeeSalary && (
-                    <th className="px-4 py-2.5 text-right text-[10px] font-mono uppercase tracking-widest text-sc-muted">Pay</th>
+                    <th className="px-4 py-2.5 text-right text-[10px] font-medium  tracking-widest text-sc-muted">Pay</th>
                   )}
-                  <th className="px-4 py-2.5 text-left text-[10px] font-mono uppercase tracking-widest text-sc-muted">Status</th>
-                  <th className="px-4 py-2.5 text-left text-[10px] font-mono uppercase tracking-widest text-sc-muted">Hire Date</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-medium  tracking-widest text-sc-muted">Status</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-medium  tracking-widest text-sc-muted">Hire Date</th>
                   {canEdit && <th className="px-4 py-2.5" />}
                 </tr>
               </thead>
@@ -277,49 +276,49 @@ export function EmployeesPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-sc-amber/10 border border-sc-amber/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-[10px] font-mono text-sc-amber font-bold">{initials(emp.name)}</span>
+                          <span className="text-[10px] font-medium text-sc-amber font-bold">{initials(emp.name)}</span>
                         </div>
                         <div>
                           <p className="font-medium text-sc-bright text-sm">{emp.name}</p>
-                          {emp.cnic && <p className="text-[10px] text-sc-muted font-mono">{emp.cnic}</p>}
+                          {emp.cnic && <p className="text-[10px] text-sc-muted font-medium">{emp.cnic}</p>}
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sc-text text-sm">{emp.jobTitle}</td>
                     <td className="px-4 py-3">
-                      <p className="text-sc-text text-xs">{emp.phone ?? '—'}</p>
+                      <p className="text-sc-text text-xs">{emp.phone ?? '-'}</p>
                       {emp.email && <p className="text-[10px] text-sc-muted">{emp.email}</p>}
                     </td>
                     {canSeeSalary && (
                       <td className="px-4 py-3 text-right">
                         {emp.monthlySalary !== null && (
-                          <p className="text-sc-amber font-mono text-xs font-semibold">{money(emp.monthlySalary)}<span className="text-sc-muted font-normal">/mo</span></p>
+                          <p className="text-sc-amber font-medium text-xs font-semibold">{money(emp.monthlySalary)}<span className="text-sc-muted font-normal">/mo</span></p>
                         )}
                         {emp.dailyWage !== null && (
-                          <p className="text-sc-muted font-mono text-[10px]">{money(emp.dailyWage)}/day</p>
+                          <p className="text-sc-muted font-medium text-[10px]">{money(emp.dailyWage)}/day</p>
                         )}
                         {emp.monthlySalary === null && emp.dailyWage === null && (
-                          <p className="text-sc-muted font-mono text-xs">—</p>
+                          <p className="text-sc-muted font-medium text-xs">-</p>
                         )}
                       </td>
                     )}
                     <td className="px-4 py-3">{statusBadge(emp.status)}</td>
-                    <td className="px-4 py-3 text-sc-muted text-xs font-mono">
-                      {emp.hireDate ? new Date(emp.hireDate).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                    <td className="px-4 py-3 text-sc-muted text-xs font-medium">
+                      {emp.hireDate ? new Date(emp.hireDate).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                     </td>
                     {canEdit && (
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1 justify-end">
                           <button
                             onClick={() => openEdit(emp)}
-                            className="px-2 py-1 text-[10px] font-mono text-sc-muted hover:text-sc-text rounded border border-sc-border hover:border-sc-text/30 transition-colors"
+                            className="px-2 py-1 text-[10px] font-medium text-sc-muted hover:text-sc-text rounded border border-sc-border hover:border-sc-text/30 transition-colors"
                           >
                             Edit
                           </button>
                           {emp.status === 'active' && (
                             <button
                               onClick={() => handleDeactivate(emp.id)}
-                              className="px-2 py-1 text-[10px] font-mono text-red-400/70 hover:text-red-400 rounded border border-red-400/10 hover:border-red-400/30 transition-colors"
+                              className="px-2 py-1 text-[10px] font-medium text-red-400/70 hover:text-red-400 rounded border border-red-400/10 hover:border-red-400/30 transition-colors"
                             >
                               Deactivate
                             </button>
@@ -353,7 +352,7 @@ export function EmployeesPage() {
             {/* Form body */}
             <div className="flex-1 p-5 space-y-4">
               {formError && (
-                <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-xs" role="alert">
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs" role="alert">
                   {formError}
                 </div>
               )}
@@ -397,10 +396,10 @@ export function EmployeesPage() {
                 placeholder="35202-1234567-1"
               />
 
-              {/* Salary section — only for admin/owner */}
+              {/* Salary section - only for admin/owner */}
               {canSeeSalary && (
                 <div className="pt-2 border-t border-sc-border space-y-4">
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-sc-muted">Compensation</p>
+                  <p className="text-[10px] font-medium  tracking-widest text-sc-muted">Compensation</p>
                   <div className="grid grid-cols-2 gap-3">
                     <TextField
                       id="emp-daily-wage"
@@ -432,11 +431,11 @@ export function EmployeesPage() {
 
               {editTarget && (
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-sc-muted mb-1.5">Status</label>
+                  <label className="block text-[10px] font-medium  tracking-widest text-sc-muted mb-1.5">Status</label>
                   <select
                     value={form.status}
                     onChange={e => setField('status', e.target.value as EmploymentStatus)}
-                    className="w-full bg-sc-surface border border-sc-border rounded-md px-3 py-2 text-sc-text text-sm focus:outline-none focus:ring-1 focus:ring-sc-amber"
+                    className="w-full bg-sc-surface border border-sc-border rounded-lg px-3 py-2 text-sc-text text-sm focus:outline-none focus:ring-1 focus:ring-sc-amber"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -446,14 +445,14 @@ export function EmployeesPage() {
               )}
 
               <div>
-                <label htmlFor="emp-notes" className="block text-[10px] font-mono uppercase tracking-widest text-sc-muted mb-1.5">Notes</label>
+                <label htmlFor="emp-notes" className="block text-[10px] font-medium  tracking-widest text-sc-muted mb-1.5">Notes</label>
                 <textarea
                   id="emp-notes"
                   value={form.notes}
                   onChange={e => setField('notes', e.target.value)}
                   rows={3}
                   placeholder="Any additional info…"
-                  className="w-full bg-sc-surface border border-sc-border rounded-md px-3 py-2 text-sc-text text-sm focus:outline-none focus:ring-1 focus:ring-sc-amber resize-none placeholder:text-sc-muted/50"
+                  className="w-full bg-sc-surface border border-sc-border rounded-lg px-3 py-2 text-sc-text text-sm focus:outline-none focus:ring-1 focus:ring-sc-amber resize-none placeholder:text-sc-muted/50"
                 />
               </div>
             </div>
@@ -468,6 +467,6 @@ export function EmployeesPage() {
           </div>
         </div>
       )}
-    </Layout>
+    </>
   );
 }

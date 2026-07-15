@@ -384,3 +384,222 @@ export type ExpenseListResponse = {
   totalPages: number;
   totalAmount: number;
 };
+
+// Phase 7: Invoices
+
+export const invoiceStatuses = ['draft', 'sent', 'partially_paid', 'paid', 'overdue'] as const;
+
+export type InvoiceStatus = (typeof invoiceStatuses)[number];
+
+export type InvoiceItem = {
+  id: string;
+  invoiceId: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+};
+
+export type Invoice = {
+  id: string;
+  projectId: string;
+  projectName: string | null;
+  clientName: string;
+  invoiceNumber: string;
+  status: InvoiceStatus;
+  subtotal: number;
+  tax: number;
+  total: number;
+  amountPaid: number;
+  balanceDue: number;
+  dueDate: string | null;
+  paidDate: string | null;
+  lastEmailedAt: string | null;
+  lastReminderSentAt: string | null;
+  reminderCount: number;
+  createdAt: string;
+  updatedAt: string;
+  items: InvoiceItem[];
+};
+
+export type InvoiceListQuery = {
+  projectId?: string;
+  status?: InvoiceStatus;
+  page?: number;
+  pageSize?: number;
+};
+
+export type InvoiceListResponse = {
+  invoices: Invoice[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  outstandingTotal: number;
+};
+
+export type CreateInvoiceItemRequest = {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export type GenerateInvoiceRequest = {
+  projectId: string;
+  dueDate?: string | null;
+  taxRate?: number;
+  includeApprovedExpenses?: boolean;
+};
+
+export type UpdateInvoiceStatusRequest = {
+  status: Extract<InvoiceStatus, 'draft' | 'sent'>;
+};
+
+export type RecordInvoicePaymentRequest = {
+  amountPaid: number;
+  paidDate?: string | null;
+};
+
+export type SendInvoiceRequest = {
+  recipientEmail?: string | null;
+  message?: string | null;
+};
+
+// Phase 8: Documents
+
+export const documentEntityTypes = ['lead', 'project', 'employee', 'invoice'] as const;
+
+export type DocumentEntityType = (typeof documentEntityTypes)[number];
+
+export const documentStorageProviders = ['local', 'r2'] as const;
+
+export type DocumentStorageProvider = (typeof documentStorageProviders)[number];
+
+export type DocumentRecord = {
+  id: string;
+  entityType: DocumentEntityType;
+  entityId: string;
+  fileName: string;
+  storageProvider: DocumentStorageProvider;
+  fileSize: number;
+  mimeType: string;
+  uploadedBy: string;
+  createdAt: string;
+  uploadedAt: string | null;
+};
+
+export type DocumentListQuery = {
+  entityType?: DocumentEntityType;
+  entityId?: string;
+};
+
+export type CreateDocumentUploadRequest = {
+  entityType: DocumentEntityType;
+  entityId: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+};
+
+export type CreateDocumentUploadResponse = {
+  document: DocumentRecord;
+  upload: {
+    method: 'PUT';
+    url: string;
+    headers: Record<string, string>;
+  };
+};
+
+// Phase 9: Dashboard & Analytics
+
+export type DashboardAnalyticsScope = 'global' | 'assigned';
+
+export type DashboardAnalyticsAccess = {
+  leads: boolean;
+  invoices: boolean;
+  financials: boolean;
+  assignedOnly: boolean;
+};
+
+export type DashboardSummary = {
+  activeLeadCount: number;
+  pipelineValue: number;
+  activeProjectCount: number;
+  completedProjectCount: number;
+  overdueInvoiceCount: number;
+  outstandingBalance: number;
+  collectedRevenue: number;
+  approvedExpenseTotal: number;
+  pendingExpenseCount: number;
+  dueSoonMilestoneCount: number;
+};
+
+export type DashboardLeadBucket = {
+  status: LeadStatus;
+  count: number;
+  estimatedValue: number;
+};
+
+export type DashboardProjectBucket = {
+  status: ProjectStatus;
+  count: number;
+};
+
+export type DashboardExpenseBucket = {
+  category: ExpenseCategory;
+  count: number;
+  total: number;
+};
+
+export type DashboardRevenuePoint = {
+  label: string;
+  invoiceTotal: number;
+  collectedTotal: number;
+  approvedExpenseTotal: number;
+};
+
+export type DashboardUpcomingMilestone = {
+  id: string;
+  projectId: string;
+  projectName: string;
+  title: string;
+  dueDate: string | null;
+  status: MilestoneStatus;
+  progress: number;
+};
+
+export type DashboardProjectSpotlight = {
+  id: string;
+  name: string;
+  clientName: string;
+  status: ProjectStatus;
+  progress: number;
+  budget: number;
+  spent: number;
+  assignmentCount: number;
+  openMilestones: number;
+  completedMilestones: number;
+};
+
+export type DashboardAlert = {
+  id: string;
+  tone: 'info' | 'warning' | 'success';
+  title: string;
+  detail: string;
+  href: string | null;
+};
+
+export type DashboardAnalyticsResponse = {
+  viewerRole: UserRole;
+  scope: DashboardAnalyticsScope;
+  generatedAt: string;
+  access: DashboardAnalyticsAccess;
+  summary: DashboardSummary;
+  leadBuckets: DashboardLeadBucket[];
+  projectBuckets: DashboardProjectBucket[];
+  expenseBuckets: DashboardExpenseBucket[];
+  revenueSeries: DashboardRevenuePoint[];
+  upcomingMilestones: DashboardUpcomingMilestone[];
+  spotlightProjects: DashboardProjectSpotlight[];
+  alerts: DashboardAlert[];
+};

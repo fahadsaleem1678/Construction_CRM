@@ -21,8 +21,16 @@ export class InMemoryProjectStore implements ProjectStore {
   assignments = new Map<string, ProjectAssignment>();
   activityRows: ProjectActivity[] = [];
 
+  private hydrateProject(project: Project): Project {
+    return {
+      ...project,
+      milestones: [...this.milestones.values()].filter((milestone) => milestone.projectId === project.id),
+      assignments: [...this.assignments.values()].filter((assignment) => assignment.projectId === project.id),
+    };
+  }
+
   async list(query: ProjectListStoreQuery) {
-    let projects = [...this.projects.values()];
+    let projects = [...this.projects.values()].map((project) => this.hydrateProject(project));
     if (query.visibleUserId) {
       const assignedProjectIds = new Set(
         [...this.assignments.values()]
@@ -41,11 +49,7 @@ export class InMemoryProjectStore implements ProjectStore {
   async findById(projectId: string) {
     const project = this.projects.get(projectId);
     if (!project) return null;
-    return {
-      ...project,
-      milestones: [...this.milestones.values()].filter((m) => m.projectId === projectId),
-      assignments: [...this.assignments.values()].filter((a) => a.projectId === projectId)
-    };
+    return this.hydrateProject(project);
   }
 
   async create(input: CreateProjectRequest) {
@@ -111,6 +115,8 @@ export class InMemoryProjectStore implements ProjectStore {
       createdAt: now()
     };
     this.milestones.set(milestone.id, milestone);
+    const project = this.projects.get(projectId);
+    if (project) this.projects.set(projectId, this.hydrateProject(project));
     return milestone;
   }
 
@@ -129,11 +135,19 @@ export class InMemoryProjectStore implements ProjectStore {
         : {})
     };
     this.milestones.set(milestoneId, next);
+    const project = this.projects.get(next.projectId);
+    if (project) this.projects.set(next.projectId, this.hydrateProject(project));
     return next;
   }
 
   async deleteMilestone(milestoneId: string) {
-    return this.milestones.delete(milestoneId);
+    const existing = this.milestones.get(milestoneId);
+    const deleted = this.milestones.delete(milestoneId);
+    if (existing) {
+      const project = this.projects.get(existing.projectId);
+      if (project) this.projects.set(existing.projectId, this.hydrateProject(project));
+    }
+    return deleted;
   }
 
   async addAssignment(projectId: string, input: CreateAssignmentRequest) {
@@ -146,11 +160,19 @@ export class InMemoryProjectStore implements ProjectStore {
       createdAt: now()
     };
     this.assignments.set(assignment.id, assignment);
+    const project = this.projects.get(projectId);
+    if (project) this.projects.set(projectId, this.hydrateProject(project));
     return assignment;
   }
 
   async removeAssignment(assignmentId: string) {
-    return this.assignments.delete(assignmentId);
+    const existing = this.assignments.get(assignmentId);
+    const deleted = this.assignments.delete(assignmentId);
+    if (existing) {
+      const project = this.projects.get(existing.projectId);
+      if (project) this.projects.set(existing.projectId, this.hydrateProject(project));
+    }
+    return deleted;
   }
 
   async activities(projectId: string) {

@@ -1,93 +1,102 @@
-/* ─── Google Fonts: DM Sans + JetBrains Mono ─────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import './design-tokens.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Base ────────────────────────────────────────────────────────────────── */
 html {
-  background: #0f0f0f;
+  background: var(--sc-bg);
   color-scheme: dark;
-  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #0f0f0f;
-  color: #e5e7eb;
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  background: var(--sc-bg);
+  color: var(--sc-text);
+  font-family: var(--sc-font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
+button, input, textarea, select { font: inherit; }
 
-button, input, textarea, select {
-  font: inherit;
-}
-
-/* Remove browser input autofill yellow */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #e5e7eb;
-  -webkit-box-shadow: 0 0 0 100px #1e1e1e inset;
+  -webkit-text-fill-color: var(--sc-text);
+  -webkit-box-shadow: 0 0 0 100px var(--sc-surface) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* ─── Ticker Marquee ──────────────────────────────────────────────────────── */
-.animate-ticker {
+:focus-visible {
+  outline: 2px solid var(--sc-amber);
+  outline-offset: 3px;
+}
+
+::selection { background: var(--sc-amber-soft); color: var(--sc-text); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--sc-sidebar); }
+::-webkit-scrollbar-thumb { background: #3a3c41; border: 2px solid var(--sc-sidebar); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #4a4c52; }
+
+.sc-page-card {
+  border: 1px solid var(--sc-border-subtle);
+  border-radius: var(--sc-radius-lg);
+  background: var(--sc-surface);
+  box-shadow: var(--sc-shadow-card);
+}
+
+.sc-table-row:hover { background: var(--sc-surface-raised); }
+
+.badge-amber   { background: rgba(201, 135, 54, 0.14); color: #e7b66c; border: 1px solid rgba(201, 135, 54, 0.28); }
+.badge-green   { background: rgba(80, 160, 112, 0.13); color: #9bc8a6; border: 1px solid rgba(80, 160, 112, 0.24); }
+.badge-red     { background: rgba(223, 107, 97, 0.12); color: #f09a93; border: 1px solid rgba(223, 107, 97, 0.24); }
+.badge-blue    { background: rgba(111, 141, 185, 0.13); color: #b7c8e6; border: 1px solid rgba(111, 141, 185, 0.24); }
+.badge-yellow  { background: rgba(201, 135, 54, 0.12); color: #e7b66c; border: 1px solid rgba(201, 135, 54, 0.24); }
+.badge-default { background: var(--sc-surface-raised); color: var(--sc-text-muted); border: 1px solid var(--sc-border); }
+
+.sc-activity-strip {
+  overflow: hidden;
+  border: 1px solid var(--sc-border-subtle);
+  border-radius: var(--sc-radius-md);
+  background: #161719;
+  color: var(--sc-text-muted);
+}
+
+.sc-activity-strip__track {
   display: flex;
   width: max-content;
-  animation: ticker 32s linear infinite;
+  animation: sc-activity-scroll 46s linear infinite;
 }
 
-.animate-ticker:hover {
-  animation-play-state: paused;
+.sc-activity-strip:hover .sc-activity-strip__track { animation-play-state: paused; }
+
+.sc-activity-strip__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 24px;
+  border-right: 1px solid var(--sc-border-subtle);
+  font-size: 12px;
+  white-space: nowrap;
 }
 
-/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #161616;
-}
-::-webkit-scrollbar-thumb {
-  background: #3d3d3d;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #525252;
+.sc-activity-strip__signal {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--sc-amber);
 }
 
-/* ─── Focus ───────────────────────────────────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid #d97706;
-  outline-offset: 2px;
+@keyframes sc-activity-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
-/* ─── Selection ───────────────────────────────────────────────────────────── */
-::selection {
-  background: rgba(217, 119, 6, 0.25);
-  color: #f9fafb;
-}
-
-/* ─── Status badge helpers ────────────────────────────────────────────────── */
-.badge-amber   { background: rgba(120,53,15,0.55);  color: #fbbf24; border: 1px solid rgba(217,119,6,0.3); }
-.badge-green   { background: rgba(20,83,45,0.55);   color: #4ade80; border: 1px solid rgba(22,163,74,0.3); }
-.badge-red     { background: rgba(127,29,29,0.55);  color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
-.badge-blue    { background: rgba(30,58,138,0.55);  color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); }
-.badge-yellow  { background: rgba(113,63,18,0.55);  color: #fcd34d; border: 1px solid rgba(202,138,4,0.3); }
-.badge-default { background: rgba(46,46,46,0.8);    color: #9ca3af; border: 1px solid #3d3d3d; }
-
-/* ─── Table row hover ─────────────────────────────────────────────────────── */
-.sc-table-row:hover {
-  background: #262626;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
