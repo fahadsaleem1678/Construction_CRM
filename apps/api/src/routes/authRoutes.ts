@@ -11,11 +11,12 @@ import {
 import { authenticate } from '../middleware/authenticate.js';
 import { authorize } from '../middleware/authorize.js';
 import type { UserStore } from '../auth/userStore.js';
+import { env } from '../config/env.js';
 
 const cookieOptions = {
   httpOnly: true,
-  sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
+  sameSite: env.NODE_ENV === 'production' ? ('none' as const) : ('lax' as const),
+  secure: env.NODE_ENV === 'production',
   path: '/api/auth'
 };
 

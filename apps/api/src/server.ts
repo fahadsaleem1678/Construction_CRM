@@ -22,8 +22,9 @@ const reminderJob = startInvoiceReminderScheduler(
   ),
 );
 
-const server = app.listen(env.API_PORT, () => {
-  console.log(`Construction CRM API listening on ${env.API_PORT}`);
+const port = Number(process.env.PORT) || env.API_PORT;
+const server = app.listen(port, () => {
+  console.log(`Construction CRM API listening on ${port}`);
 });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
