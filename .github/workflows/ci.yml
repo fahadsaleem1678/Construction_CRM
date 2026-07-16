@@ -38,6 +38,9 @@ jobs:
       - name: Build shared types
         run: pnpm --dir packages/shared-types build
 
+      - name: Generate Prisma client
+        run: pnpm --dir apps/api prisma:generate
+
       - name: Build API
         run: pnpm --dir apps/api build
 
