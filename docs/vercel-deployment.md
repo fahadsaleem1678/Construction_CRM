@@ -73,6 +73,7 @@ That backend host must have production environment variables configured, includi
 - `JWT_ACCESS_SECRET`
 - `JWT_REFRESH_SECRET`
 - `APP_ORIGIN`
+- `APP_ORIGINS`
 - `DOCUMENT_STORAGE_DRIVER`
 - `R2_ENDPOINT`
 - `R2_REGION`
@@ -81,7 +82,7 @@ That backend host must have production environment variables configured, includi
 - `R2_SECRET_ACCESS_KEY`
 - `R2_PUBLIC_BASE_URL`
 
-For production, `APP_ORIGIN` must match the deployed frontend domain.
+For production, `APP_ORIGIN` must match the primary deployed frontend domain. Use `APP_ORIGINS` for every additional allowed Vercel alias, separated by commas.
 
 ## What I still need from you
 
@@ -97,5 +98,5 @@ To complete live deployment, I need:
 1. Link the GitHub repo to Vercel with root directory `apps/web`
 2. Deploy the backend API to a public host
 3. Set `VITE_API_URL` in Vercel
-4. Set backend `APP_ORIGIN` to the Vercel domain
+4. Set backend `APP_ORIGIN` to the primary Vercel domain and `APP_ORIGINS` to all active Vercel aliases
 5. Push to `main` and verify the CI workflow and Vercel production deployment

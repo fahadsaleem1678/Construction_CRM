@@ -49,6 +49,17 @@ import { analyticsRoutes } from './routes/analyticsRoutes.js';
 import { SearchService } from './search/searchService.js';
 import { searchRoutes } from './routes/searchRoutes.js';
 
+const allowedOrigins = new Set(env.APP_ORIGINS);
+
+function resolveCorsOrigin(origin: string | undefined, callback: (error: Error | null, origin?: boolean) => void) {
+  if (!origin || allowedOrigins.has(origin)) {
+    callback(null, true);
+    return;
+  }
+
+  callback(new Error(`CORS origin not allowed: ${origin}`));
+}
+
 export function createApp(
   store: UserStore = new PrismaUserStore(prisma),
   leadStore: LeadStore = new PrismaLeadStore(prisma),
@@ -83,7 +94,7 @@ export function createApp(
   const search = new SearchService(leadStore, projectStore, invoiceStore);
 
   app.use(helmet());
-  app.use(cors({ origin: env.APP_ORIGIN, credentials: true }));
+  app.use(cors({ origin: resolveCorsOrigin, credentials: true }));
   app.use(express.json());
   app.use(cookieParser());
   app.use(pinoHttp({ enabled: env.NODE_ENV !== 'test' }));

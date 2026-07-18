@@ -18,6 +18,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_PORT: z.coerce.number().default(4000),
   APP_ORIGIN: z.string().url().default('http://localhost:5173'),
+  APP_ORIGINS: z.string().optional(),
   DATABASE_URL: z.string().min(1).optional(),
   SUPABASE_AUTH_ENABLED: z
     .enum(['true', 'false'])
@@ -43,9 +44,17 @@ const envSchema = z.object({
 });
 
 const parsedEnv = envSchema.parse(process.env);
+const appOrigins = [
+  parsedEnv.APP_ORIGIN,
+  ...(parsedEnv.APP_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+];
 
 export const env = {
   ...parsedEnv,
+  APP_ORIGINS: [...new Set(appOrigins)],
   DOCUMENT_MAX_FILE_SIZE_BYTES: Math.round(parsedEnv.DOCUMENT_MAX_FILE_SIZE_MB * 1024 * 1024),
   SUPABASE_AUTH_ENABLED: parsedEnv.NODE_ENV === 'test' ? false : parsedEnv.SUPABASE_AUTH_ENABLED
 };
