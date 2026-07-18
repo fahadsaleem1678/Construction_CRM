@@ -102,6 +102,14 @@ describe('phase 4 projects', () => {
     expect(assignment.status).toBe(201);
     expect(assignment.body.assignment.roleOnProject).toBe('Site Supervisor');
 
+    // Managers can revise an assignment without removing and recreating it.
+    const assignmentUpdated = await request(app)
+      .patch(`/api/projects/${created.body.project.id}/assignments/${assignment.body.assignment.id}`)
+      .set('Authorization', `Bearer ${manager.token}`)
+      .send({ roleOnProject: 'Project Coordinator' });
+    expect(assignmentUpdated.status).toBe(200);
+    expect(assignmentUpdated.body.assignment.roleOnProject).toBe('Project Coordinator');
+
     // Get project detail — should include milestones and assignments
     const detail = await request(app)
       .get(`/api/projects/${created.body.project.id}`)

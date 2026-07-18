@@ -7,7 +7,8 @@ import type {
   ProjectActivity,
   ProjectMilestone,
   UpdateProjectRequest,
-  UpdateMilestoneRequest
+  UpdateMilestoneRequest,
+  UpdateAssignmentRequest
 } from '@construction-crm/shared-types';
 import type { ProjectListStoreQuery, ProjectStore } from './projectStore.js';
 
@@ -235,6 +236,29 @@ export class PrismaProjectStore implements ProjectStore {
       roleOnProject: row.roleOnProject,
       createdAt: row.createdAt.toISOString()
     };
+  }
+
+  async updateAssignment(id: string, input: UpdateAssignmentRequest) {
+    try {
+      const row = await this.prisma.projectAssignment.update({
+        where: { id },
+        data: {
+          ...(input.userId !== undefined ? { userId: input.userId } : {}),
+          ...(input.roleOnProject !== undefined ? { roleOnProject: input.roleOnProject } : {})
+        },
+        include: { user: { select: { name: true } } }
+      });
+      return {
+        id: row.id,
+        projectId: row.projectId,
+        userId: row.userId,
+        userName: row.user?.name ?? null,
+        roleOnProject: row.roleOnProject,
+        createdAt: row.createdAt.toISOString()
+      };
+    } catch {
+      return null;
+    }
   }
 
   async removeAssignment(id: string) {

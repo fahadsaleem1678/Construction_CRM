@@ -215,7 +215,7 @@ export function InvoicesPage() {
             </div>
           </div>
 
-          <div className="mt-6 space-y-4 rounded-2xl border border-sc-border bg-sc-surface p-4">
+          {canManage && <div className="mt-6 space-y-4 rounded-2xl border border-sc-border bg-sc-surface p-4">
             <div>
               <p className="text-sm font-medium text-sc-bright">Generate invoice</p>
               <p className="mt-1 text-xs text-sc-muted">Pull quotation lines and approved project expenses into a fresh invoice.</p>
@@ -262,7 +262,7 @@ export function InvoicesPage() {
             <Button variant="primary" size="sm" onClick={handleGenerate} disabled={!canManage || submitting}>
               {submitting ? 'Generating...' : 'Generate Invoice'}
             </Button>
-          </div>
+          </div>}
         </div>
 
         <div className="rounded-3xl border border-sc-border bg-sc-panel p-5 shadow-sc-panel">

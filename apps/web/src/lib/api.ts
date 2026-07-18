@@ -25,6 +25,7 @@ import type {
   CreateMilestoneRequest,
   UpdateMilestoneRequest,
   CreateAssignmentRequest,
+  UpdateAssignmentRequest,
   AuthUser,
   Invoice,
   InvoiceListQuery,
@@ -256,6 +257,13 @@ export function deleteMilestone(projectId: string, milestoneId: string) {
 export function addAssignment(projectId: string, input: CreateAssignmentRequest) {
   return apiFetch<{ assignment: ProjectAssignment }>(`/projects/${projectId}/assignments`, {
     method: 'POST',
+    body: JSON.stringify(input)
+  });
+}
+
+export function updateAssignment(projectId: string, assignmentId: string, input: UpdateAssignmentRequest) {
+  return apiFetch<{ assignment: ProjectAssignment }>(`/projects/${projectId}/assignments/${assignmentId}`, {
+    method: 'PATCH',
     body: JSON.stringify(input)
   });
 }

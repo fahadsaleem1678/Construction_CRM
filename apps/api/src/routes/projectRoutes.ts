@@ -8,7 +8,8 @@ import {
   projectListQuerySchema,
   createMilestoneSchema,
   updateMilestoneSchema,
-  createAssignmentSchema
+  createAssignmentSchema,
+  updateAssignmentSchema
 } from '../projects/projectSchemas.js';
 
 export function projectRoutes(projects: ProjectService, userStore: UserStore) {
@@ -107,6 +108,15 @@ export function projectRoutes(projects: ProjectService, userStore: UserStore) {
     try {
       const assignment = await projects.addAssignment(req.params.id, createAssignmentSchema.parse(req.body), req.user!);
       res.status(201).json({ assignment });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.patch('/:id/assignments/:aid', async (req, res, next) => {
+    try {
+      const assignment = await projects.updateAssignment(req.params.id, req.params.aid, updateAssignmentSchema.parse(req.body), req.user!);
+      res.json({ assignment });
     } catch (error) {
       next(error);
     }

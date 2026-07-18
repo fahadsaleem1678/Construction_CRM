@@ -8,7 +8,8 @@ import type {
   ProjectAssignment,
   ProjectMilestone,
   UpdateProjectRequest,
-  UpdateMilestoneRequest
+  UpdateMilestoneRequest,
+  UpdateAssignmentRequest
 } from '@construction-crm/shared-types';
 import type { ProjectListStoreQuery, ProjectStore } from './projectStore.js';
 
@@ -163,6 +164,20 @@ export class InMemoryProjectStore implements ProjectStore {
     const project = this.projects.get(projectId);
     if (project) this.projects.set(projectId, this.hydrateProject(project));
     return assignment;
+  }
+
+  async updateAssignment(assignmentId: string, input: UpdateAssignmentRequest) {
+    const existing = this.assignments.get(assignmentId);
+    if (!existing) return null;
+    const next: ProjectAssignment = {
+      ...existing,
+      ...(input.userId !== undefined ? { userId: input.userId, userName: null } : {}),
+      ...(input.roleOnProject !== undefined ? { roleOnProject: input.roleOnProject } : {})
+    };
+    this.assignments.set(assignmentId, next);
+    const project = this.projects.get(next.projectId);
+    if (project) this.projects.set(next.projectId, this.hydrateProject(project));
+    return next;
   }
 
   async removeAssignment(assignmentId: string) {

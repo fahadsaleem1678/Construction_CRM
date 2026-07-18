@@ -28,6 +28,7 @@ export interface ProjectStore {
   deleteMilestone(id: string): Promise<boolean>;
 
   addAssignment(projectId: string, input: CreateAssignmentRequest): Promise<ProjectAssignment>;
+  updateAssignment(id: string, input: import('@construction-crm/shared-types').UpdateAssignmentRequest): Promise<ProjectAssignment | null>;
   removeAssignment(id: string): Promise<boolean>;
 
   activities(projectId: string): Promise<ProjectActivity[]>;

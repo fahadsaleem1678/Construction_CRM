@@ -28,10 +28,10 @@ const NAV_ITEMS: Array<{ to: string; label: string; icon: typeof LayoutDashboard
   { to: '/leads', label: 'Leads', icon: UsersRound, roles: ['owner', 'admin', 'manager'] },
   { to: '/quotations', label: 'Quotations', icon: FileText, roles: ['owner', 'admin', 'manager'] },
   { to: '/projects', label: 'Projects', icon: BriefcaseBusiness, roles: ['owner', 'admin', 'manager', 'employee'] },
-  { to: '/expenses', label: 'Expenses', icon: ReceiptText, roles: ['owner', 'admin', 'accountant'] },
-  { to: '/invoices', label: 'Invoices', icon: FileText, roles: ['owner', 'admin', 'accountant'] },
+  { to: '/expenses', label: 'Expenses', icon: ReceiptText, roles: ['owner', 'admin', 'accountant', 'employee'] },
+  { to: '/invoices', label: 'Invoices', icon: FileText, roles: ['owner', 'admin', 'manager', 'accountant'] },
   { to: '/documents', label: 'Documents', icon: FolderOpen, roles: ['owner', 'admin', 'manager', 'accountant'] },
-  { to: '/employees', label: 'Employees', icon: HardHat, roles: ['owner', 'admin'] },
+  { to: '/employees', label: 'Employees', icon: HardHat, roles: ['owner', 'admin', 'manager'] },
   { to: '/audit-log', label: 'Audit log', icon: FileText, roles: ['owner', 'admin'] },
 ];
 

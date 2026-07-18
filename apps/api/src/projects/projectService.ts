@@ -5,7 +5,8 @@ import type {
   CreateAssignmentRequest,
   ProjectListQuery,
   UpdateProjectRequest,
-  UpdateMilestoneRequest
+  UpdateMilestoneRequest,
+  UpdateAssignmentRequest
 } from '@construction-crm/shared-types';
 import { AppError, forbidden } from '../auth/errors.js';
 import type { QuotationStore } from '../quotations/quotationStore.js';
@@ -195,5 +196,20 @@ export class ProjectService {
     if (!canManage(user)) throw forbidden('Only owners, admins, and managers can manage assignments');
     const deleted = await this.projects.removeAssignment(assignmentId);
     if (!deleted) throw new AppError(404, 'Assignment not found');
+  }
+
+  async updateAssignment(projectId: string, assignmentId: string, input: UpdateAssignmentRequest, user: AuthUser) {
+    if (!canManage(user)) throw forbidden('Only owners, admins, and managers can manage assignments');
+    const project = await this.projects.findById(projectId);
+    if (!project) throw new AppError(404, 'Project not found');
+    const assignment = await this.projects.updateAssignment(assignmentId, input);
+    if (!assignment) throw new AppError(404, 'Assignment not found');
+    await this.projects.addActivity({
+      userId: user.id,
+      action: 'assignment_updated',
+      entityId: projectId,
+      metadata: { assignmentId, ...(input.userId ? { assignedUserId: input.userId } : {}), ...(input.roleOnProject ? { roleOnProject: input.roleOnProject } : {}) }
+    });
+    return assignment;
   }
 }

@@ -48,3 +48,10 @@ export const createAssignmentSchema = z.object({
   userId: z.string().uuid(),
   roleOnProject: z.string().min(1)
 });
+
+export const updateAssignmentSchema = z.object({
+  userId: z.string().uuid().optional(),
+  roleOnProject: z.string().min(1).optional()
+}).refine((input) => input.userId !== undefined || input.roleOnProject !== undefined, {
+  message: 'At least one assignment field is required'
+});

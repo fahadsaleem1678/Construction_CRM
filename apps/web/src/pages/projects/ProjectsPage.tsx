@@ -5,7 +5,9 @@ import type {
   ProjectStatus,
   MilestoneStatus,
   AuthUser,
-  Quotation
+  Quotation,
+  ProjectMilestone,
+  ProjectAssignment
 } from '@construction-crm/shared-types';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
@@ -21,6 +23,7 @@ import {
   updateMilestone,
   deleteMilestone,
   addAssignment,
+  updateAssignment,
   removeAssignment,
   listUsers,
   listQuotations
@@ -98,11 +101,17 @@ export function ProjectsPage() {
 
   const [selected, setSelected] = useState<Project | null>(null);
   const [activities, setActivities] = useState<ProjectActivity[]>([]);
+  const [editingMilestone, setEditingMilestone] = useState<ProjectMilestone | null>(null);
+  const [editingAssignment, setEditingAssignment] = useState<ProjectAssignment | null>(null);
 
   const [milestoneTitle, setMilestoneTitle] = useState('');
   const [milestoneDueDate, setMilestoneDueDate] = useState('');
   const [assigneeUserId, setAssigneeUserId] = useState('');
   const [assigneeRole, setAssigneeRole] = useState('');
+  const [editMilestoneTitle, setEditMilestoneTitle] = useState('');
+  const [editMilestoneDueDate, setEditMilestoneDueDate] = useState('');
+  const [editAssignmentUserId, setEditAssignmentUserId] = useState('');
+  const [editAssignmentRole, setEditAssignmentRole] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
@@ -200,6 +209,26 @@ export function ProjectsPage() {
     catch (e) { setError(e instanceof Error ? e.message : 'Failed to delete milestone'); }
   }
 
+  function startEditingMilestone(milestone: ProjectMilestone) {
+    setEditingMilestone(milestone);
+    setEditMilestoneTitle(milestone.title);
+    setEditMilestoneDueDate(milestone.dueDate ? milestone.dueDate.slice(0, 10) : '');
+  }
+
+  async function handleUpdateMilestone(event: FormEvent) {
+    event.preventDefault();
+    if (!selected || !editingMilestone) return;
+    setError(null);
+    try {
+      await updateMilestone(selected.id, editingMilestone.id, {
+        title: editMilestoneTitle,
+        dueDate: editMilestoneDueDate ? new Date(editMilestoneDueDate).toISOString() : null
+      });
+      setEditingMilestone(null);
+      await openProject(selected);
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed to update milestone'); }
+  }
+
   async function handleAddAssignment(e: FormEvent) {
     e.preventDefault(); if (!selected || !assigneeUserId || !assigneeRole) return; setError(null);
     try {
@@ -212,6 +241,23 @@ export function ProjectsPage() {
     if (!selected) return; setError(null);
     try { await removeAssignment(selected.id, assignmentId); await openProject(selected); }
     catch (e) { setError(e instanceof Error ? e.message : 'Failed to remove assignment'); }
+  }
+
+  function startEditingAssignment(assignment: ProjectAssignment) {
+    setEditingAssignment(assignment);
+    setEditAssignmentUserId(assignment.userId);
+    setEditAssignmentRole(assignment.roleOnProject);
+  }
+
+  async function handleUpdateAssignment(event: FormEvent) {
+    event.preventDefault();
+    if (!selected || !editingAssignment || !editAssignmentUserId || !editAssignmentRole) return;
+    setError(null);
+    try {
+      await updateAssignment(selected.id, editingAssignment.id, { userId: editAssignmentUserId, roleOnProject: editAssignmentRole });
+      setEditingAssignment(null);
+      await openProject(selected);
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed to update assignment'); }
   }
 
   async function handleRemoveProject(project: Project) {
@@ -467,7 +513,7 @@ export function ProjectsPage() {
                   <div className="divide-y divide-sc-border border-y border-sc-border">
                     {selected.milestones.map((m) => (
                       <div key={m.id} className="flex items-center gap-3 py-2.5">
-                        <button
+                        {isManager ? <button
                           type="button"
                           onClick={() => void handleToggleMilestone(m.id, m.status)}
                           className={`h-4 w-4 shrink-0 rounded border transition ${m.status === 'completed' ? 'bg-sc-green border-sc-green' : 'border-sc-border2 bg-sc-surface'}`}
@@ -476,12 +522,17 @@ export function ProjectsPage() {
                           {m.status === 'completed' && (
                             <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full p-0.5"><polyline points="20 6 9 17 4 12"/></svg>
                           )}
-                        </button>
+                        </button> : <span className={`h-4 w-4 shrink-0 rounded border ${m.status === 'completed' ? 'border-sc-green bg-sc-green' : 'border-sc-border2 bg-sc-surface'}`} aria-hidden />}
                         <div className="flex-1 min-w-0">
                           <span className={`text-xs ${m.status === 'completed' ? 'line-through text-sc-muted' : 'text-sc-text'}`}>{m.title}</span>
                           {m.dueDate && <span className="block font-medium text-[10px] text-sc-muted">{new Date(m.dueDate).toLocaleDateString()}</span>}
                         </div>
-                        <button type="button" onClick={() => void handleDeleteMilestone(m.id)} className="text-sc-muted hover:text-red-400 transition text-xs px-1">�-</button>
+                        {isManager && (
+                          <div className="flex items-center gap-2">
+                            <button type="button" onClick={() => startEditingMilestone(m)} className="text-xs text-sc-muted transition hover:text-sc-amber">Edit</button>
+                            <button type="button" onClick={() => void handleDeleteMilestone(m.id)} className="px-1 text-xs text-sc-muted transition hover:text-red-400">Remove</button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -518,7 +569,10 @@ export function ProjectsPage() {
                           <span className="block font-medium text-[10px] text-sc-muted capitalize">{a.roleOnProject}</span>
                         </div>
                         {isManager && (
-                          <button type="button" onClick={() => void handleRemoveAssignment(a.id)} className="text-xs text-sc-muted hover:text-red-400 transition px-1">�-</button>
+                          <div className="flex items-center gap-2">
+                            <button type="button" onClick={() => startEditingAssignment(a)} className="text-xs text-sc-muted transition hover:text-sc-amber">Edit</button>
+                            <button type="button" onClick={() => void handleRemoveAssignment(a.id)} className="px-1 text-xs text-sc-muted transition hover:text-red-400">Remove</button>
+                          </div>
                         )}
                       </div>
                     ))}
@@ -563,6 +617,31 @@ export function ProjectsPage() {
             </div>
           </aside>
         </div>
+      )}
+
+      {editingMilestone && (
+        <Modal title="Edit milestone" onClose={() => setEditingMilestone(null)}>
+          <form onSubmit={handleUpdateMilestone} className="space-y-4">
+            <TextField label="Milestone title" value={editMilestoneTitle} onChange={(event) => setEditMilestoneTitle(event.target.value)} required />
+            <TextField label="Due date" type="date" value={editMilestoneDueDate} onChange={(event) => setEditMilestoneDueDate(event.target.value)} />
+            <Button type="submit" className="w-full">Save milestone</Button>
+          </form>
+        </Modal>
+      )}
+
+      {editingAssignment && (
+        <Modal title="Edit team assignment" onClose={() => setEditingAssignment(null)}>
+          <form onSubmit={handleUpdateAssignment} className="space-y-4">
+            <label className="block text-xs text-sc-muted">Team member
+              <select className={`${SC_SELECT} mt-1`} value={editAssignmentUserId} onChange={(event) => setEditAssignmentUserId(event.target.value)} required>
+                <option value="">Select team member...</option>
+                {activeUsers.map((member) => <option key={member.id} value={member.id}>{member.name} ({member.role})</option>)}
+              </select>
+            </label>
+            <TextField label="Role on project" value={editAssignmentRole} onChange={(event) => setEditAssignmentRole(event.target.value)} required />
+            <Button type="submit" className="w-full">Save assignment</Button>
+          </form>
+        </Modal>
       )}
     </div>
   );

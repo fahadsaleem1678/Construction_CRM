@@ -249,6 +249,11 @@ export type CreateAssignmentRequest = {
   roleOnProject: string;
 };
 
+export type UpdateAssignmentRequest = {
+  userId?: string;
+  roleOnProject?: string;
+};
+
 export type ProjectActivity = {
   id: string;
   userName: string | null;
