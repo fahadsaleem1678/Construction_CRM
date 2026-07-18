@@ -46,7 +46,7 @@ graph TD
 
 ## What's Built vs. What's Remaining
 
-### ✅ Already Built (Phases 1–9)
+### ✅ Already Built (Phases 1–10)
 
 ```
 Phase 1 — Foundation & Auth          ██████████ DONE
@@ -58,6 +58,7 @@ Phase 6 — Expenses                   ██████████ DONE
 Phase 7 — Invoices                   ██████████ DONE
 Phase 8 — Document Uploads           ██████████ DONE
 Phase 9 — Dashboard & Analytics      ██████████ DONE
+Phase 10 — Polish                    ██████████ DONE
 ```
 
 **What you can do right now:**
@@ -77,8 +78,7 @@ Phase 9 — Dashboard & Analytics      ██████████ DONE
 ### 🔜 Still Needs To Be Built (Phases 10–13)
 
 ```
-Phase 10 — Polish                    ░░░░░░░░░░ TODO ← NEXT
-Phase 11 — Testing                   ░░░░░░░░░░ TODO
+Phase 11 — Testing                   ░░░░░░░░░░ TODO ← NEXT
 Phase 12 — Deployment                ░░░░░░░░░░ TODO
 Phase 13 — Portfolio Packaging       ░░░░░░░░░░ TODO
 ```
@@ -251,4 +251,4 @@ When all 13 phases are complete, the construction company owner gets:
 > [!IMPORTANT]
 > **In a nutshell**: This is a full-stack construction business management CRM. We've built the core lead-to-invoice workflow, including auth, leads, quotations, projects, employees, expenses, invoices, document uploads, and dashboard analytics. Next we polish the operator experience, then expand testing, deployment, and portfolio packaging.
 >
-> **Progress: ~69% complete** (9 of 13 delivery phases done). The core business workflow is now established — next up is production-readiness polish.
+> **Progress: ~77% complete** (10 of 13 delivery phases done). The core workflow and operator polish are established. Next up is broader automated testing.

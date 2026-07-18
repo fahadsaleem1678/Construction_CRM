@@ -202,10 +202,9 @@ export function DashboardPage() {
 
     if (snapshot.viewerRole === 'employee') {
       return [
-        { label: 'Assigned leads', value: String(snapshot.summary.activeLeadCount), detail: 'Opportunities currently assigned to you.', icon: FolderKanban },
         { label: 'Assigned projects', value: String(snapshot.summary.activeProjectCount), detail: 'Projects where you are on the active site roster.', icon: BriefcaseBusiness },
         { label: 'Due soon', value: String(snapshot.summary.dueSoonMilestoneCount), detail: 'Milestones landing in the next two weeks.', icon: CalendarClock },
-        { label: 'Expense queue', value: String(snapshot.summary.pendingExpenseCount), detail: 'Your submitted costs still waiting for approval.', icon: FileWarning },
+        { label: 'Completed projects', value: String(snapshot.summary.completedProjectCount), detail: 'Assigned projects that have already been delivered.', icon: CheckCircle2 },
       ];
     }
 
@@ -223,7 +222,7 @@ export function DashboardPage() {
         { label: 'Active leads', value: String(snapshot.summary.activeLeadCount), detail: 'Live pipeline items that still need progress.', icon: FolderKanban },
         { label: 'Active projects', value: String(snapshot.summary.activeProjectCount), detail: 'Projects currently planning, in progress, or on hold.', icon: BriefcaseBusiness },
         { label: 'Due soon', value: String(snapshot.summary.dueSoonMilestoneCount), detail: 'Milestones approaching within the next two weeks.', icon: CalendarClock },
-        { label: 'Pending expenses', value: String(snapshot.summary.pendingExpenseCount), detail: 'Submissions waiting for review and finance action.', icon: FileWarning },
+        { label: 'Completed projects', value: String(snapshot.summary.completedProjectCount), detail: 'Projects already delivered and closed out.', icon: CheckCircle2 },
       ];
     }
 
@@ -271,9 +270,15 @@ export function DashboardPage() {
         <div className="absolute bottom-[-90px] left-[-70px] h-48 w-48 rounded-full bg-sky-500/10 blur-3xl" aria-hidden="true" />
         <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium text-sc-amber">Phase 9 dashboard</p>
+            <p className="text-sm font-medium text-sc-amber">Your workspace</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-sc-bright sm:text-4xl">
-              {snapshot?.scope === 'assigned' ? 'Your projects and delivery queue' : 'Operations, finance, and delivery in one view'}
+              {snapshot?.viewerRole === 'accountant'
+                ? 'Financial control in one view'
+                : snapshot?.viewerRole === 'manager'
+                  ? 'Your operations and delivery queue'
+                  : snapshot?.scope === 'assigned'
+                    ? 'Your projects and delivery queue'
+                    : 'Operations, finance, and delivery in one view'}
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-sc-sub">
               {snapshot?.viewerRole === 'accountant'
@@ -327,7 +332,7 @@ export function DashboardPage() {
 
       <section className="grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
         <div className="space-y-6">
-          {snapshot?.access.leads ? (
+          {snapshot?.access.leads && !snapshot.access.assignedOnly ? (
             <StatusBars
               title="Lead pipeline"
               caption="Where current opportunities are sitting, plus the estimated value still in play."
@@ -395,21 +400,23 @@ export function DashboardPage() {
                         <div className="h-full rounded-full bg-sc-amber" style={{ width: `${Math.max(6, project.progress)}%` }} />
                       </div>
                     </div>
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-sc-muted">
-                        <span>Budget used</span>
-                        <span>{project.budget > 0 ? `${Math.round(spendRatio)}%` : 'No budget'}</span>
+                    {snapshot?.access.financials ? (
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-sc-muted">
+                          <span>Budget used</span>
+                          <span>{project.budget > 0 ? `${Math.round(spendRatio)}%` : 'No budget'}</span>
+                        </div>
+                        <div className="mt-2 h-2 rounded-full bg-sc-surface">
+                          <div className="h-full rounded-full bg-sky-400" style={{ width: `${Math.max(spendRatio > 0 ? 6 : 0, Math.min(100, spendRatio))}%` }} />
+                        </div>
                       </div>
-                      <div className="mt-2 h-2 rounded-full bg-sc-surface">
-                        <div className="h-full rounded-full bg-sky-400" style={{ width: `${Math.max(spendRatio > 0 ? 6 : 0, Math.min(100, spendRatio))}%` }} />
-                      </div>
-                    </div>
+                    ) : null}
                   </div>
                   <div className="mt-4 flex flex-wrap gap-4 text-xs text-sc-muted">
                     <span>{project.assignmentCount} assigned</span>
                     <span>{project.openMilestones} open milestones</span>
                     <span>{project.completedMilestones} completed</span>
-                    <span>{formatCurrency(project.spent)} spent</span>
+                    {snapshot?.access.financials ? <span>{formatCurrency(project.spent)} spent</span> : null}
                   </div>
                 </Link>
               );

@@ -11,6 +11,7 @@ import { EmployeesPage } from './pages/employees/EmployeesPage';
 import { ExpensesPage } from './pages/expenses/ExpensesPage';
 import { InvoicesPage } from './pages/invoices/InvoicesPage';
 import { DocumentsPage } from './pages/documents/DocumentsPage';
+import { AuditLogPage } from './pages/AuditLogPage';
 import { useSessionStore } from './lib/sessionStore';
 
 export function App() {
@@ -34,6 +35,7 @@ export function App() {
           <Route path="/expenses" element={<ExpensesPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/audit-log" element={<AuditLogPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

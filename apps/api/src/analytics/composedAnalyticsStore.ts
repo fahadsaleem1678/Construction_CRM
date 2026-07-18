@@ -71,6 +71,15 @@ function dashboardAccess(role: UserRole): DashboardAnalyticsAccess {
     };
   }
 
+  if (role === 'manager') {
+    return {
+      leads: true,
+      invoices: false,
+      financials: false,
+      assignedOnly: false,
+    };
+  }
+
   return {
     leads: true,
     invoices: true,

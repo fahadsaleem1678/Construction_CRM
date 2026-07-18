@@ -15,21 +15,24 @@ import {
   UsersRound,
   X,
 } from 'lucide-react';
-import type { GlobalSearchResult } from '@construction-crm/shared-types';
+import type { GlobalSearchResult, UserRole } from '@construction-crm/shared-types';
 import { globalSearch } from '../lib/api';
+import { getDashboardAnalytics } from '../lib/api';
+import { LoadingPanel } from './AsyncState';
 import { useSessionStore } from '../lib/sessionStore';
 
 type LayoutProps = { children: React.ReactNode };
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Overview', icon: LayoutDashboard },
-  { to: '/leads', label: 'Leads', icon: UsersRound },
-  { to: '/quotations', label: 'Quotations', icon: FileText },
-  { to: '/projects', label: 'Projects', icon: BriefcaseBusiness },
-  { to: '/expenses', label: 'Expenses', icon: ReceiptText },
-  { to: '/invoices', label: 'Invoices', icon: FileText },
-  { to: '/documents', label: 'Documents', icon: FolderOpen },
-  { to: '/employees', label: 'Employees', icon: HardHat },
+const NAV_ITEMS: Array<{ to: string; label: string; icon: typeof LayoutDashboard; roles: UserRole[] }> = [
+  { to: '/', label: 'Overview', icon: LayoutDashboard, roles: ['owner', 'admin', 'manager', 'accountant', 'employee'] },
+  { to: '/leads', label: 'Leads', icon: UsersRound, roles: ['owner', 'admin', 'manager'] },
+  { to: '/quotations', label: 'Quotations', icon: FileText, roles: ['owner', 'admin', 'manager'] },
+  { to: '/projects', label: 'Projects', icon: BriefcaseBusiness, roles: ['owner', 'admin', 'manager', 'employee'] },
+  { to: '/expenses', label: 'Expenses', icon: ReceiptText, roles: ['owner', 'admin', 'accountant'] },
+  { to: '/invoices', label: 'Invoices', icon: FileText, roles: ['owner', 'admin', 'accountant'] },
+  { to: '/documents', label: 'Documents', icon: FolderOpen, roles: ['owner', 'admin', 'manager', 'accountant'] },
+  { to: '/employees', label: 'Employees', icon: HardHat, roles: ['owner', 'admin'] },
+  { to: '/audit-log', label: 'Audit log', icon: FileText, roles: ['owner', 'admin'] },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
@@ -41,6 +44,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/invoices': 'Invoices',
   '/documents': 'Documents',
   '/employees': 'Employees',
+  '/audit-log': 'Audit log',
 };
 
 function SiteCoreMark() {
@@ -58,9 +62,12 @@ function SiteCoreMark() {
 }
 
 function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+  const user = useSessionStore((state) => state.user);
+  const visibleItems = NAV_ITEMS.filter((item) => !user || item.roles.includes(user.role));
+
   return (
     <nav aria-label="Primary navigation" className="flex flex-col gap-1">
-      {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+      {visibleItems.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}
@@ -230,6 +237,12 @@ function GlobalSearchBox() {
   );
 }
 
+function Notifications() {
+  const [open, setOpen] = useState(false); const [loading, setLoading] = useState(false); const [alerts, setAlerts] = useState<Awaited<ReturnType<typeof getDashboardAnalytics>>['alerts']>([]); const navigate = useNavigate();
+  async function toggle() { const next = !open; setOpen(next); if (next && alerts.length === 0) { setLoading(true); try { setAlerts((await getDashboardAnalytics()).alerts); } finally { setLoading(false); } } }
+  return <div className="relative"><button type="button" onClick={() => void toggle()} className="rounded-lg p-2.5 text-sc-muted transition-colors hover:bg-sc-surface hover:text-sc-text" aria-label="Notifications" aria-expanded={open}><Bell size={18} strokeWidth={1.7} aria-hidden="true" /></button>{open && <div className="absolute right-0 top-12 z-40 w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-sc-border bg-sc-panel shadow-sc-panel"><div className="border-b border-sc-border-subtle px-4 py-3"><p className="text-sm font-semibold text-sc-bright">Notifications</p><p className="mt-0.5 text-xs text-sc-muted">Live signals from your workspace</p></div>{loading ? <div className="p-4"><LoadingPanel label="Loading notifications" /></div> : alerts.length === 0 ? <p className="px-4 py-8 text-center text-sm text-sc-muted">No actions need attention right now.</p> : <div className="max-h-[360px] overflow-y-auto py-2">{alerts.map((alert) => <button key={alert.id} type="button" onClick={() => { if (alert.href) navigate(alert.href); setOpen(false); }} className="w-full px-4 py-3 text-left transition-colors hover:bg-sc-surface"><p className="text-sm font-medium text-sc-bright">{alert.title}</p><p className="mt-1 text-xs leading-5 text-sc-muted">{alert.detail}</p></button>)}</div>}</div>}</div>;
+}
+
 export function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation();
   const { user } = useSessionStore();
@@ -276,9 +289,7 @@ export function Layout({ children }: LayoutProps) {
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <GlobalSearchBox />
-            <button className="rounded-lg p-2.5 text-sc-muted transition-colors hover:bg-sc-surface hover:text-sc-text" aria-label="Notifications">
-              <Bell size={18} strokeWidth={1.7} aria-hidden="true" />
-            </button>
+            <Notifications />
             <div className="grid h-9 w-9 place-items-center rounded-full bg-sc-surface-strong text-xs font-semibold text-sc-amber">{initials}</div>
           </div>
         </header>
