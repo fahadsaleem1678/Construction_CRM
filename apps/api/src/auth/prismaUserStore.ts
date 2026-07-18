@@ -63,7 +63,14 @@ export class PrismaUserStore implements UserStore {
   }
 
   async findUserByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email: normalizeEmail(email) } });
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizeEmail(email),
+          mode: 'insensitive'
+        }
+      }
+    });
     return user ? toUser(user) : null;
   }
 

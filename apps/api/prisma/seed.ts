@@ -4,16 +4,17 @@ import { hashPassword } from '../src/auth/passwords.js';
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.OWNER_SEED_EMAIL ?? 'owner@construction.local';
+  const email = (process.env.OWNER_SEED_EMAIL ?? 'owner@construction.local').trim().toLowerCase();
   const password = process.env.OWNER_SEED_PASSWORD ?? 'ChangeMe123!';
   const name = process.env.OWNER_SEED_NAME ?? 'Company Owner';
+  const passwordHash = await hashPassword(password);
 
   await prisma.user.upsert({
     where: { email },
     update: {
       name,
       role: 'owner',
-      passwordHash: await hashPassword(password),
+      passwordHash,
       emailVerified: true,
       isActive: true
     },
@@ -21,7 +22,7 @@ async function main() {
       email,
       name,
       role: 'owner',
-      passwordHash: await hashPassword(password),
+      passwordHash,
       emailVerified: true
     }
   });
