@@ -81,8 +81,41 @@ That backend host must have production environment variables configured, includi
 - `R2_ACCESS_KEY_ID`
 - `R2_SECRET_ACCESS_KEY`
 - `R2_PUBLIC_BASE_URL`
+- `OWNER_SEED_EMAIL`
+- `OWNER_SEED_PASSWORD`
+- `OWNER_SEED_NAME`
+- `DEMO_ACCOUNT_DOMAIN`
+- `DEMO_SEED_PASSWORD`
 
 For production, `APP_ORIGIN` must match the primary deployed frontend domain. Use `APP_ORIGINS` for every additional allowed Vercel alias, separated by commas.
+
+## Production test accounts
+
+The backend seed creates the owner from `OWNER_SEED_*` variables and repeatable dummy staff accounts from `DEMO_*` variables.
+
+Recommended Railway variables:
+
+- `DEMO_ACCOUNT_DOMAIN=construction.com`
+- `DEMO_SEED_PASSWORD=<one strong shared testing password>`
+
+Generated dummy accounts:
+
+- `admin@construction.com` - admin
+- `manager1@construction.com` - manager
+- `manager2@construction.com` - manager
+- `employee1@construction.com` - employee
+- `employee2@construction.com` - employee
+- `employee3@construction.com` - employee
+- `employee4@construction.com` - employee
+- `employee5@construction.com` - employee
+- `employee6@construction.com` - employee
+- `accountant@construction.com` - accountant
+
+Run after setting the variables:
+
+```bash
+pnpm --filter @construction-crm/api prisma:seed
+```
 
 ## What I still need from you
 
