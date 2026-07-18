@@ -7,11 +7,9 @@ import { TextField } from '../components/TextField';
 import { useSessionStore } from '../lib/sessionStore';
 
 export function LoginPage() {
-  const { user, loginUser, registerFirstOwner, error } = useSessionStore();
-  const [mode, setMode] = useState<'login' | 'owner'>('login');
-  const [email, setEmail] = useState('owner@construction.local');
-  const [name, setName] = useState('Company Owner');
-  const [password, setPassword] = useState('ChangeMe123!');
+  const { user, loginUser, error } = useSessionStore();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
 
   if (user) return <Navigate to="/" replace />;
@@ -20,8 +18,7 @@ export function LoginPage() {
     event.preventDefault();
     setBusy(true);
     try {
-      if (mode === 'owner') await registerFirstOwner(email, name, password);
-      else await loginUser(email, password);
+      await loginUser(email, password);
     } finally {
       setBusy(false);
     }
@@ -53,23 +50,15 @@ export function LoginPage() {
             <div><p className="text-lg font-semibold tracking-tight text-sc-bright">SiteCore</p><p className="text-xs text-sc-muted">Construction CRM</p></div>
           </div>
           <div className="mb-7">
-            <h2 className="text-2xl font-semibold tracking-tight text-sc-bright">{mode === 'owner' ? 'Set up your workspace' : 'Welcome back'}</h2>
-            <p className="mt-2 text-sm leading-6 text-sc-muted">{mode === 'owner' ? 'Create the first owner account for your company.' : 'Sign in to manage your construction operations.'}</p>
-          </div>
-          <div className="mb-7 grid grid-cols-2 rounded-xl border border-sc-border-subtle bg-sc-panel p-1">
-            {(['login', 'owner'] as const).map((item) => (
-              <button key={item} type="button" id={`mode-${item}`} onClick={() => setMode(item)} className={['rounded-lg px-3 py-2.5 text-sm font-medium transition-colors', mode === item ? 'bg-sc-surface-strong text-sc-bright shadow-sm' : 'text-sc-muted hover:text-sc-text'].join(' ')}>
-                {item === 'login' ? 'Sign in' : 'First owner'}
-              </button>
-            ))}
+            <h2 className="text-2xl font-semibold tracking-tight text-sc-bright">Welcome back</h2>
+            <p className="mt-2 text-sm leading-6 text-sc-muted">Sign in to manage your construction operations.</p>
           </div>
           <form onSubmit={submit} id="auth-form" className="space-y-5">
-            {mode === 'owner' && <TextField label="Full name" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required />}
             <TextField label="Email address" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
-            <TextField label="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === 'owner' ? 'new-password' : 'current-password'} required />
+            <TextField label="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
             {error && <div className="rounded-xl border border-sc-red/35 bg-sc-red-m/40 px-4 py-3 text-sm text-red-200" role="alert">{error}</div>}
             <Button type="submit" disabled={busy} className="w-full">
-              {busy ? 'Verifying...' : mode === 'owner' ? 'Create account' : 'Sign in'} {!busy && <ArrowRight size={17} strokeWidth={1.8} aria-hidden="true" />}
+              {busy ? 'Verifying...' : 'Sign in'} {!busy && <ArrowRight size={17} strokeWidth={1.8} aria-hidden="true" />}
             </Button>
           </form>
         </div>
