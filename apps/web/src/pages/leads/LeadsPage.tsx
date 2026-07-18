@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type { CreateLeadRequest, Lead, LeadActivity, LeadSource, LeadStatus } from '@construction-crm/shared-types';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
 import { ActivityStrip } from '../../components/ActivityStrip';
@@ -52,6 +53,7 @@ const SC_TEXTAREA = [
 ].join(' ');
 
 export function LeadsPage() {
+  const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -111,8 +113,8 @@ export function LeadsPage() {
     setError(null);
     const res = await startLeadQuotation(lead.id).catch((e) => { setError(e instanceof Error ? e.message : 'Unable to start quotation'); return null; });
     if (!res) return;
-    setMessage(`Quotation started for ${res.quotationDraft.clientName}`);
-    await loadLeads(page); await openLead(res.lead);
+    setSelected(null);
+    navigate(`/quotations?leadId=${encodeURIComponent(res.quotationDraft.leadId)}`);
   }
 
   const pipeline = useMemo(() =>

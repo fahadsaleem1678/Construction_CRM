@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import type { CreateQuotationItemRequest, Quotation, QuotationStatus } from '@construction-crm/shared-types';
+import { useSearchParams } from 'react-router-dom';
+import type { CreateQuotationItemRequest, Lead, Quotation, QuotationStatus } from '@construction-crm/shared-types';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
-import { createQuotation, listQuotations, setQuotationStatus } from '../../lib/api';
+import { createQuotation, listLeads, listQuotations, setQuotationStatus } from '../../lib/api';
 
 const statuses: QuotationStatus[] = ['draft', 'sent', 'accepted', 'rejected', 'expired'];
 
@@ -19,7 +20,9 @@ function money(v: number) {
 }
 
 export function QuotationsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [leadId, setLeadId] = useState('');
   const [validUntil, setValidUntil] = useState('');
   const [items, setItems] = useState<CreateQuotationItemRequest[]>([
@@ -32,12 +35,21 @@ export function QuotationsPage() {
   async function load() {
     setError(null);
     try {
-      const res = await listQuotations();
-      setQuotations(res.quotations);
+      const [quotationRes, leadRes] = await Promise.all([
+        listQuotations(),
+        listLeads({ page: 1, pageSize: 100 }),
+      ]);
+      setQuotations(quotationRes.quotations);
+      setLeads(leadRes.leads);
     } catch (e) { setError(e instanceof Error ? e.message : 'Unable to load quotations'); }
   }
 
   useEffect(() => { void load(); }, []);
+
+  useEffect(() => {
+    const selectedLeadId = searchParams.get('leadId');
+    if (selectedLeadId) setLeadId(selectedLeadId);
+  }, [searchParams]);
 
   const totals = useMemo(() => {
     const subtotal = items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unitPrice), 0);
@@ -50,7 +62,9 @@ export function QuotationsPage() {
     try {
       const res = await createQuotation({ leadId, validUntil: validUntil ? new Date(validUntil).toISOString() : null, taxRate, items });
       setMessage(`Created ${res.quotation.quotationNumber}`);
-      setLeadId(''); await load();
+      setLeadId('');
+      setSearchParams({});
+      await load();
     } catch (e) { setError(e instanceof Error ? e.message : 'Unable to create quotation'); }
   }
 
@@ -91,7 +105,23 @@ export function QuotationsPage() {
         <aside className="space-y-5 lg:border-r lg:border-sc-border lg:pr-8">
           <h2 className="font-medium text-[10px]  tracking-[0.15em] text-sc-muted">New Quotation</h2>
           <form onSubmit={submit} id="create-quotation-form" className="space-y-4">
-            <TextField label="Lead ID" value={leadId} onChange={(e) => setLeadId(e.target.value)} placeholder="UUID of the lead" required />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="quotation-lead-select" className="font-medium text-[10px]  tracking-[0.12em] text-sc-sub">Lead</label>
+              <select
+                id="quotation-lead-select"
+                className="w-full rounded-lg border border-sc-border bg-sc-surface px-3 py-2 text-xs text-sc-text transition-colors focus:border-sc-amber focus:outline-none focus:ring-2 focus:ring-sc-amber/30"
+                value={leadId}
+                onChange={(e) => setLeadId(e.target.value)}
+                required
+              >
+                <option value="">Select a lead</option>
+                {leads.map((lead) => (
+                  <option key={lead.id} value={lead.id}>
+                    {lead.clientName} - {money(lead.estimatedValue)} - {lead.status.replace('_', ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
             <TextField label="Valid until" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
             <TextField label="Tax rate (0-1)" type="number" step="0.01" min="0" max="1" value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value))} />
 
