@@ -1,10 +1,10 @@
 import type { PrismaClient } from '@prisma/client';
-import type { ExpenseListQuery } from '@construction-crm/shared-types';
 import type {
   CreateExpenseInput,
   ExpenseRow,
   ExpenseStore,
   ExpenseListResult,
+  ExpenseStoreListQuery,
 } from './expenseStore.js';
 
 type PrismaExpenseWithRelations = {
@@ -61,13 +61,14 @@ const includeRelations = {
 export class PrismaExpenseStore implements ExpenseStore {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async listExpenses(query: ExpenseListQuery): Promise<ExpenseListResult> {
+  async listExpenses(query: ExpenseStoreListQuery): Promise<ExpenseListResult> {
     const page = Math.max(1, query.page ?? 1);
     const pageSize = Math.min(100, query.pageSize ?? 20);
     const skip = (page - 1) * pageSize;
 
     const where = {
       ...(query.projectId ? { projectId: query.projectId } : {}),
+      ...(query.submittedBy ? { submittedBy: query.submittedBy } : {}),
       ...(query.status ? { status: query.status } : {}),
       ...(query.category ? { category: query.category } : {}),
     };

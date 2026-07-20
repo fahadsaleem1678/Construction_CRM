@@ -1,5 +1,9 @@
 import type { ExpenseCategory, ExpenseStatus, ExpenseListQuery } from '@construction-crm/shared-types';
 
+export type ExpenseStoreListQuery = ExpenseListQuery & {
+  submittedBy?: string;
+};
+
 export type ExpenseRow = {
   id: string;
   projectId: string | null;
@@ -42,7 +46,7 @@ export type ExpenseListResult = {
 };
 
 export interface ExpenseStore {
-  listExpenses(query: ExpenseListQuery): Promise<ExpenseListResult>;
+  listExpenses(query: ExpenseStoreListQuery): Promise<ExpenseListResult>;
   getExpenseById(id: string): Promise<ExpenseRow | null>;
   createExpense(input: CreateExpenseInput): Promise<ExpenseRow>;
   approveExpense(id: string, approverId: string): Promise<ExpenseRow | null>;

@@ -24,7 +24,7 @@ export function expenseRoutes(expenseService: ExpenseService, store: UserStore) 
         page: req.query['page'] ? Number(req.query['page']) : undefined,
         pageSize: req.query['pageSize'] ? Number(req.query['pageSize']) : undefined,
       };
-      const result = await expenseService.listExpenses(query, req.user!.role);
+      const result = await expenseService.listExpenses(query, req.user!);
       res.json(result);
     } catch (err) {
       next(err);
@@ -34,7 +34,7 @@ export function expenseRoutes(expenseService: ExpenseService, store: UserStore) 
   // Get single expense
   router.get('/:id', async (req, res, next) => {
     try {
-      const expense = await expenseService.getExpense(req.params['id'] as string);
+      const expense = await expenseService.getExpense(req.params['id'] as string, req.user!);
       if (!expense) return res.status(404).json({ message: 'Expense not found' });
       res.json({ expense });
     } catch (err) {

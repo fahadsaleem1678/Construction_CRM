@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { Expense, ExpenseStatus } from '@construction-crm/shared-types';
-import type { CreateExpenseInput, ExpenseListResult, ExpenseRow, ExpenseStore } from './expenseStore.js';
+import type { CreateExpenseInput, ExpenseListResult, ExpenseRow, ExpenseStore, ExpenseStoreListQuery } from './expenseStore.js';
 
 const id = () => crypto.randomUUID();
 const now = () => new Date().toISOString();
@@ -12,13 +12,14 @@ function toRow(expense: Expense): ExpenseRow {
 export class InMemoryExpenseStore implements ExpenseStore {
   private readonly expenses = new Map<string, Expense>();
 
-  async listExpenses(query: import('@construction-crm/shared-types').ExpenseListQuery): Promise<ExpenseListResult> {
+  async listExpenses(query: ExpenseStoreListQuery): Promise<ExpenseListResult> {
     const page = Math.max(1, query.page ?? 1);
     const pageSize = Math.min(100, query.pageSize ?? 20);
     const start = (page - 1) * pageSize;
 
     let expenses = [...this.expenses.values()];
     if (query.projectId) expenses = expenses.filter((expense) => expense.projectId === query.projectId);
+    if (query.submittedBy) expenses = expenses.filter((expense) => expense.submittedBy === query.submittedBy);
     if (query.status) expenses = expenses.filter((expense) => expense.status === query.status);
     if (query.category) expenses = expenses.filter((expense) => expense.category === query.category);
     expenses.sort((a, b) => b.expenseDate.localeCompare(a.expenseDate));

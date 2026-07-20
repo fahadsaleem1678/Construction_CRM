@@ -1,4 +1,4 @@
-import type { UserRole, Expense, ExpenseListQuery } from '@construction-crm/shared-types';
+import type { AuthUser, UserRole, Expense, ExpenseListQuery } from '@construction-crm/shared-types';
 import type { CreateExpenseInput, ExpenseRow, ExpenseStore, ExpenseListResult } from './expenseStore.js';
 
 /** Roles that can approve / reject expenses */
@@ -11,16 +11,20 @@ function toPublic(row: ExpenseRow): Expense {
 export class ExpenseService {
   constructor(private readonly store: ExpenseStore) {}
 
-  async listExpenses(query: ExpenseListQuery, _callerRole: UserRole) {
-    const result = await this.store.listExpenses(query);
+  async listExpenses(query: ExpenseListQuery, user: AuthUser) {
+    const result = await this.store.listExpenses({
+      ...query,
+      submittedBy: user.role === 'employee' ? user.id : undefined,
+    });
     return {
       ...result,
       expenses: result.expenses.map(toPublic),
     };
   }
 
-  async getExpense(id: string): Promise<Expense | null> {
+  async getExpense(id: string, user: AuthUser): Promise<Expense | null> {
     const row = await this.store.getExpenseById(id);
+    if (row && user.role === 'employee' && row.submittedBy !== user.id) return null;
     return row ? toPublic(row) : null;
   }
 
